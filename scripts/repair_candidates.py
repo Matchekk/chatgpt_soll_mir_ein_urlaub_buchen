@@ -51,6 +51,25 @@ def _append_note(existing: str, note: str) -> str:
     return f"{existing} {note}".strip()
 
 
+def _price_looks_implausible(value: Any) -> bool:
+    text = str(value or "").strip()
+    if is_unknownish(text):
+        return True
+    number = parse_float(text)
+    numeric_chunks = re.findall(r"\d+", text)
+    if number is None:
+        return True
+    if number < 100:
+        return True
+    if number > 5000:
+        return True
+    if len(numeric_chunks) >= 3 and not re.search(r"(?:€|eur)", text, flags=re.IGNORECASE):
+        return True
+    if re.search(r"20\d{2}.*\b[0-1]?\d\b.*\b[0-3]?\d\b", text):
+        return True
+    return False
+
+
 def main() -> int:
     candidates = read_csv(CANDIDATES_PATH, CANDIDATE_COLUMNS)
     intake = read_csv(LINK_INTAKE_PATH, LINK_INTAKE_COLUMNS)
@@ -61,13 +80,12 @@ def main() -> int:
         candidate = row.to_dict()
         url = str(candidate.get("url", "")).strip()
         platform = str(candidate.get("platform", "")).strip().lower()
-        price_total = parse_float(candidate.get("price_total"))
         intake_row = intake_by_url.get(url)
 
         repaired = False
-        if platform == "airbnb" and price_total is not None and price_total < 100 and intake_row:
+        if platform == "airbnb" and intake_row and _price_looks_implausible(candidate.get("price_total")):
             fallback_total = _fallback_total_from_intake(intake_row)
-            if fallback_total is not None and fallback_total >= 100:
+            if fallback_total is not None and 100 <= fallback_total <= 5000:
                 candidate["price_total"] = str(int(fallback_total)) if fallback_total.is_integer() else f"{fallback_total:.2f}"
                 candidate["notes"] = _append_note(candidate.get("notes", ""), "Preis aus Intake-Hinweis übernommen; vor Buchung live prüfen.")
                 repaired = True
