@@ -9,7 +9,9 @@ import sys
 import traceback
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+from urllib.request import Request, urlopen
 
 from extract_listing import extract_listing, model_to_dict
 from score_candidate import score_candidate
@@ -139,11 +141,57 @@ def _markdown_to_text(markdown_value: Any) -> str:
     return str(markdown_value or "")
 
 
+def crawl_with_http_fetch(url: str, previous_error: str = "") -> dict[str, Any]:
+    try:
+        request = Request(url, headers={"Accept-Language": "de-DE,de;q=0.9,en;q=0.8"})
+        with urlopen(request, timeout=45) as response:
+            raw = response.read()
+            charset = response.headers.get_content_charset() or "utf-8"
+            html = raw.decode(charset, errors="replace")
+            status_code = getattr(response, "status", None)
+    except HTTPError as exc:
+        return {
+            "crawl_status": "blocked" if exc.code in {401, 403, 429} else "failed",
+            "error": f"HTTP fetch failed: {exc}",
+            "markdown": "",
+            "html": "",
+            "metadata": {"fallback": "urllib", "status_code": exc.code, "previous_error": previous_error},
+        }
+    except (URLError, TimeoutError, OSError) as exc:
+        return {
+            "crawl_status": "failed",
+            "error": f"HTTP fetch failed: {exc}",
+            "markdown": "",
+            "html": "",
+            "metadata": {"fallback": "urllib", "previous_error": previous_error},
+        }
+    combined = html.lower()
+    has_listing_content = any(marker in combined for marker in LISTING_MARKERS)
+    crawl_status = "success" if html and has_listing_content else ("partial" if html else "failed")
+    return {
+        "crawl_status": crawl_status,
+        "markdown": html,
+        "html": html,
+        "metadata": {
+            "fallback": "urllib",
+            "status_code": status_code,
+            "success": bool(html),
+            "error": previous_error,
+            "crawl_status": crawl_status,
+            "html_length": len(html),
+            "markdown_length": len(html),
+            "screenshot_present": False,
+        },
+        "screenshot": None,
+        "screenshot_path": "",
+    }
+
+
 async def crawl_with_crawl4ai(url: str, platform: str = "") -> dict[str, Any]:
     try:
         from crawl4ai import AsyncWebCrawler
     except Exception as exc:
-        return {"crawl_status": "failed", "error": f"crawl4ai import failed: {exc}", "markdown": "", "html": "", "metadata": {}}
+        return crawl_with_http_fetch(url, f"crawl4ai import failed: {exc}")
 
     BrowserConfig = CrawlerRunConfig = None
     try:
@@ -165,7 +213,7 @@ async def crawl_with_crawl4ai(url: str, platform: str = "") -> dict[str, Any]:
             else:
                 result = await crawler.arun(url=url)
     except Exception as exc:
-        return {"crawl_status": "failed", "error": str(exc), "traceback": traceback.format_exc(), "markdown": "", "html": "", "metadata": {}}
+        return crawl_with_http_fetch(url, str(exc))
 
     markdown = _markdown_to_text(getattr(result, "markdown", ""))
     html = getattr(result, "html", "") or getattr(result, "cleaned_html", "") or ""
