@@ -1,0 +1,56 @@
+name: Crawl accommodation links
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "data/link-intake.csv"
+      - ".github/workflows/crawl-links.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crawl-links-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  crawl-links:
+    if: github.event_name != 'push' || github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Crawl links
+        run: python scripts/crawl_links.py
+        continue-on-error: true
+
+      - name: Validate candidates
+        run: python scripts/validate_candidates.py
+
+      - name: Build Excel export
+        run: python scripts/build_excel.py
+
+      - name: Commit generated updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/costa-blanca-candidates.csv data/link-intake.csv data/raw data/extracted data/screenshots data/errors exports/costa-blanca-matrix.xlsx
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+          else
+            git commit -m "Update travel candidates from link intake"
+            git push
+          fi

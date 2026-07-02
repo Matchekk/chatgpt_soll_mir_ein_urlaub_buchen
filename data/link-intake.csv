@@ -1,3 +1,3 @@
-status,submitted_by,source_url,source_type,date_range_hint,notes,reviewed,last_updated
-new,Noa,,,,,false,2026-07-02
-new,Mati,,,,,false,2026-07-02
+link_id,status,submitted_by,source_url,platform,date_range_hint,notes,priority,crawl_status,needs_manual_input,reviewed,last_updated
+,new,Noa,,,,,,,false,false,2026-07-02
+,new,Mati,,,,,,,false,false,2026-07-02
