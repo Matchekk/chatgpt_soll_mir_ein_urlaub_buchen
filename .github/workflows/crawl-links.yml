@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - "data/link-intake.csv"
+      - "scripts/**"
+      - "requirements.txt"
       - ".github/workflows/crawl-links.yml"
 
 permissions:
