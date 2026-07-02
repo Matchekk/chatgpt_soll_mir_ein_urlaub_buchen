@@ -2,3 +2,4 @@ link_id,status,submitted_by,source_url,platform,date_range_hint,notes,priority,c
 ,new,Noa,,,,,,,false,false,2026-07-02
 ,new,Mati,,,,,,,false,false,2026-07-02
 link_01b1a36aa388,done,Mati,https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76,airbnb,"8 Naechte, ca. 500 EUR pp",Re-run mit Browser Installation und Repair Step.,high,success,false,false,2026-07-02
+link_ddb53dd48221,new,Mati,https://www.airbnb.de/rooms/23320876?check_in=2026-09-08&check_out=2026-09-16&adults=2&guests=2&children=0&infants=0&pets=0,airbnb,2026-09-08 to 2026-09-16,"Airbnb 23320876. User URL hatte adults=1; fuer die Suche auf 2 Erwachsene normalisiert. Preis und Gaestezahl vor Buchung live pruefen.",high,,true,false,2026-07-02
