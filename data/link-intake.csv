@@ -1,4 +1,4 @@
 link_id,status,submitted_by,source_url,platform,date_range_hint,notes,priority,crawl_status,needs_manual_input,reviewed,last_updated
 ,new,Noa,,,,,,,false,false,2026-07-02
 ,new,Mati,,,,,,,false,false,2026-07-02
-link_01b1a36aa388,done,Mati,https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76,airbnb,"8 nights, user note: ca. 500 EUR pp",User flagged as strong price find: ca. 500 EUR per person for 8 nights.,high,success,false,false,2026-07-02
+link_01b1a36aa388,new,Mati,https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76,airbnb,"8 nights, user note: ca. 500 EUR pp","Re-run requested via ChatGPT on 2026-07-02. If location, exact dates, price or reviews remain unknown, manual validation is required.",high,,true,false,2026-07-02
