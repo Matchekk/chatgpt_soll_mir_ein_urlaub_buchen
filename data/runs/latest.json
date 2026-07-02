@@ -1,23 +1,10 @@
 {
   "blocked_count": 0,
-  "failed_count": 1,
-  "finished_at": "2026-07-02T12:15:48Z",
-  "processed_count": 1,
-  "processed_links": [
-    {
-      "candidate_id": "cand_01b1a36aa388",
-      "crawl_status": "failed",
-      "extracted_json_path": "",
-      "link_id": "link_01b1a36aa388",
-      "needs_manual_input": true,
-      "raw_html_path": "data/raw/link_01b1a36aa388.html",
-      "raw_markdown_path": "data/raw/link_01b1a36aa388.md",
-      "screenshot_path": "",
-      "sheet_payload_path": "data/sheet-payloads/link_01b1a36aa388.json",
-      "source_url": "https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76"
-    }
-  ],
-  "run_id": "28589202404",
-  "started_at": "2026-07-02T12:15:47Z",
+  "failed_count": 0,
+  "finished_at": "2026-07-02T12:27:20Z",
+  "processed_count": 0,
+  "processed_links": [],
+  "run_id": "28589882998",
+  "started_at": "2026-07-02T12:27:20Z",
   "success_count": 0
 }
