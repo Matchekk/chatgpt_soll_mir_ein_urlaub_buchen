@@ -1,8 +1,8 @@
 {
-  "seed_file": "D:\\Projekte\\urlaub\\data\\link-intake-codex-seeds-2026-09-08-to-2026-09-16.csv",
+  "seed_file": "/home/runner/work/chatgpt_soll_mir_ein_urlaub_buchen/chatgpt_soll_mir_ein_urlaub_buchen/data/link-intake-codex-seeds-2026-09-08-to-2026-09-16.csv",
   "read": 72,
-  "imported": 51,
-  "skipped": 0,
-  "duplicates": 21,
+  "imported": 0,
+  "skipped": 52,
+  "duplicates": 20,
   "missing_seed_file": false
 }

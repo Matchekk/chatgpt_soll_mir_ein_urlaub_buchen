@@ -3,15 +3,15 @@
 ## Zusammenfassung
 
 - Seed-Zeilen gelesen: 72
-- Importiert: 51
-- Dedupliziert: 21
-- Übersprungen: 0
+- Importiert: 0
+- Dedupliziert: 20
+- Übersprungen: 52
 - Airbnb-Suchseiten verarbeitet: 14
 - Airbnb-Suchseiten mit Room-Links: 0
 - Airbnb-Room-Links gefunden: 0
 - Airbnb-Room-Links importiert: 0
-- Im letzten Lauf verarbeitet: 46
-- Erfolgreich gecrawlt: 35
+- Im letzten Lauf verarbeitet: 0
+- Erfolgreich gecrawlt: 0
 - Blockiert: 0
 - Fehlgeschlagen: 0
 - Kandidaten mit `needs_manual_input=true`: 2
