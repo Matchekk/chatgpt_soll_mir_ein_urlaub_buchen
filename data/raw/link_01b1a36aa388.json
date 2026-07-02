@@ -1,10 +1,18 @@
 {
-  "crawl_status": "failed",
+  "crawl_status": "success",
+  "crawl_url": "https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76",
+  "error": "BrowserType.launch: Executable doesn't exist at /home/runner/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝",
+  "fallback": "urllib",
+  "html_length": 942770,
   "link_id": "link_01b1a36aa388",
+  "markdown_length": 942770,
   "platform": "airbnb",
   "raw_html_path": "data/raw/link_01b1a36aa388.html",
   "raw_json_path": "data/raw/link_01b1a36aa388.json",
   "raw_markdown_path": "data/raw/link_01b1a36aa388.md",
   "screenshot_path": "",
-  "source_url": "https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76"
+  "screenshot_present": false,
+  "source_url": "https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76",
+  "status_code": 200,
+  "success": true
 }
