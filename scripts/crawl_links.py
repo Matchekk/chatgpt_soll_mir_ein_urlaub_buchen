@@ -34,10 +34,21 @@ BLOCKED_MARKERS = [
     "captcha",
     "verify you are human",
     "access denied",
-    "blocked",
+    "request blocked",
+    "temporarily blocked",
     "unusual traffic",
     "enable cookies",
     "robot check",
+]
+
+LISTING_MARKERS = [
+    "/rooms/",
+    "# apartment",
+    "# villa",
+    "# casa",
+    "# bungalow",
+    "alle fotos anzeigen",
+    "show all photos",
 ]
 
 
@@ -80,7 +91,8 @@ async def crawl_with_crawl4ai(url: str) -> dict[str, Any]:
     success = bool(getattr(result, "success", bool(markdown or html)))
     error = getattr(result, "error_message", "") or getattr(result, "error", "")
     combined = f"{markdown}\n{html}\n{error}".lower()
-    blocked = status_code in {401, 403, 429} or any(marker in combined for marker in BLOCKED_MARKERS)
+    has_listing_content = any(marker in combined for marker in LISTING_MARKERS)
+    blocked = status_code in {401, 403, 429} or (any(marker in combined for marker in BLOCKED_MARKERS) and not has_listing_content)
     crawl_status = "blocked" if blocked else ("success" if success and (markdown or html) else "failed")
 
     screenshot_path = ""
@@ -148,13 +160,16 @@ def candidate_from_link(row: dict[str, Any], crawl_status: str, manual: bool, ra
 def process_extracted(row: dict[str, Any], extracted: dict[str, Any], crawl_status: str, raw_md: Path, raw_json: Path, screenshot_path: str) -> dict[str, Any]:
     url = str(row.get("source_url", "")).strip()
     candidate = candidate_from_link(row, crawl_status, False, raw_md, raw_json, screenshot_path)
-    candidate.update({k: v for k, v in extracted.items() if k in CANDIDATE_COLUMNS})
+    for key, value in extracted.items():
+        if key in CANDIDATE_COLUMNS and str(value).strip().lower() not in {"", "unknown", "not_available"}:
+            candidate[key] = value
     candidate["candidate_id"] = stable_id(url, "cand_")
     candidate["url"] = url
     candidate["source"] = row.get("platform") or candidate.get("platform") or detect_platform(url)
     candidate["platform"] = row.get("platform") or candidate.get("platform") or detect_platform(url)
     candidate["crawl_status"] = crawl_status
-    candidate["needs_manual_input"] = "false"
+    critical_unknown = any(str(candidate.get(key, "")).strip().lower() in {"", "unknown", "not_available"} for key in ["location", "price_total"])
+    candidate["needs_manual_input"] = "true" if critical_unknown else "false"
     candidate["raw_markdown_path"] = repo_relative(raw_md)
     candidate["raw_json_path"] = repo_relative(raw_json)
     candidate["screenshot_path"] = screenshot_path

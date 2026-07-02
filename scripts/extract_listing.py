@@ -115,6 +115,16 @@ def _first_match(patterns: list[str], text: str) -> str:
     return UNKNOWN
 
 
+def _markdown_title(text: str) -> str:
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("# "):
+            title = stripped.lstrip("#").strip()
+            if 5 <= len(title) <= 160:
+                return title
+    return UNKNOWN
+
+
 def _contains_any(text: str, terms: list[str]) -> list[str]:
     text_l = text.lower()
     return [term for term in terms if term in text_l]
@@ -177,6 +187,8 @@ def extract_listing(raw: str, url: str = "", platform: str | None = None) -> Lis
 
     _extract_from_json_ld(_json_ld_payloads(raw), result)
 
+    if result["name"] == UNKNOWN:
+        result["name"] = _markdown_title(text)
     if result["name"] == UNKNOWN:
         lines = [line.strip("# *\t ") for line in text.splitlines() if line.strip()]
         result["name"] = next((line for line in lines[:8] if 8 <= len(line) <= 140), UNKNOWN)
