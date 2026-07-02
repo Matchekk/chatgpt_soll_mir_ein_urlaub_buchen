@@ -9,6 +9,7 @@ from utils import (
     CANDIDATES_PATH,
     LINK_INTAKE_COLUMNS,
     LINK_INTAKE_PATH,
+    UNKNOWN,
     infer_nights,
     is_unknownish,
     parse_float,
@@ -83,12 +84,16 @@ def main() -> int:
         intake_row = intake_by_url.get(url)
 
         repaired = False
-        if platform == "airbnb" and intake_row and _price_looks_implausible(candidate.get("price_total")):
-            fallback_total = _fallback_total_from_intake(intake_row)
+        if platform == "airbnb" and _price_looks_implausible(candidate.get("price_total")):
+            fallback_total = _fallback_total_from_intake(intake_row) if intake_row else None
             if fallback_total is not None and 100 <= fallback_total <= 5000:
                 candidate["price_total"] = str(int(fallback_total)) if fallback_total.is_integer() else f"{fallback_total:.2f}"
                 candidate["notes"] = _append_note(candidate.get("notes", ""), "Preis aus Intake-Hinweis übernommen; vor Buchung live prüfen.")
-                repaired = True
+            else:
+                candidate["price_total"] = UNKNOWN
+                candidate["needs_manual_input"] = "true"
+                candidate["notes"] = _append_note(candidate.get("notes", ""), "Crawler-Preis war unplausibel; Preis muss manuell geprüft werden.")
+            repaired = True
 
         name = str(candidate.get("name", "")).lower()
         if platform == "airbnb" and "apartment" in name and str(candidate.get("property_type", "")).lower() == "villa":
@@ -103,6 +108,8 @@ def main() -> int:
 
         if repaired:
             scored = score_candidate(candidate)
+            if candidate.get("needs_manual_input") == "true":
+                scored["needs_manual_input"] = "true"
             for col in CANDIDATE_COLUMNS:
                 candidates.at[idx, col] = str(scored.get(col, "") or "")
             if intake_row:
