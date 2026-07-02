@@ -18,11 +18,19 @@ RAW_DIR = DATA_DIR / "raw"
 EXTRACTED_DIR = DATA_DIR / "extracted"
 SCREENSHOTS_DIR = DATA_DIR / "screenshots"
 ERRORS_DIR = DATA_DIR / "errors"
+SHEET_PAYLOADS_DIR = DATA_DIR / "sheet-payloads"
+RUNS_DIR = DATA_DIR / "runs"
 EXPORTS_DIR = ROOT / "exports"
 
 LINK_INTAKE_PATH = DATA_DIR / "link-intake.csv"
 CANDIDATES_PATH = DATA_DIR / "costa-blanca-candidates.csv"
 EXCEL_PATH = EXPORTS_DIR / "costa-blanca-matrix.xlsx"
+
+GOOGLE_SHEET_TARGET = {
+    "spreadsheet_id": "1WLQPMeByU0EMO7W8D9v6SuOeIBXVyXWXw07LexT-e_s",
+    "spreadsheet_name": "Sommerurlaub Mati und Noa",
+    "preferred_sheet": "Kandidaten",
+}
 
 UNKNOWN = "unknown"
 TRUTHY = {"true", "1", "yes", "ja", "y"}
@@ -87,7 +95,10 @@ CANDIDATE_COLUMNS = [
     "crawl_status",
     "needs_manual_input",
     "raw_markdown_path",
+    "raw_html_path",
     "raw_json_path",
+    "extracted_json_path",
+    "sheet_payload_path",
     "screenshot_path",
     "excluded",
     "exclusion_reason",
@@ -97,12 +108,25 @@ CANDIDATE_COLUMNS = [
 
 
 def ensure_directories() -> None:
-    for path in [DATA_DIR, RAW_DIR, EXTRACTED_DIR, SCREENSHOTS_DIR, ERRORS_DIR, EXPORTS_DIR]:
+    for path in [
+        DATA_DIR,
+        RAW_DIR,
+        EXTRACTED_DIR,
+        SCREENSHOTS_DIR,
+        ERRORS_DIR,
+        SHEET_PAYLOADS_DIR,
+        RUNS_DIR,
+        EXPORTS_DIR,
+    ]:
         path.mkdir(parents=True, exist_ok=True)
 
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).date().isoformat()
+
+
+def now_timestamp() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def normalize_url(url: str) -> str:
@@ -187,6 +211,37 @@ def parse_int(value: Any) -> int | None:
     return int(round(number)) if number is not None else None
 
 
+def is_unknownish(value: Any) -> bool:
+    return str(value or "").strip().lower() in {"", "unknown", "not_available", "none", "nan"}
+
+
+def known_value(value: Any) -> str:
+    return "" if is_unknownish(value) else str(value).strip()
+
+
+def infer_nights(text: Any) -> str:
+    haystack = str(text or "")
+    patterns = [
+        r"(\d{1,2})\s*(?:nights|nächte|naechte)",
+        r"(\d{1,2})\s*(?:night|nacht)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, haystack, flags=re.IGNORECASE)
+        if match:
+            return match.group(1)
+
+    date_match = re.search(r"(\d{4}-\d{2}-\d{2})\s*(?:to|-|bis)\s*(\d{4}-\d{2}-\d{2})", haystack, flags=re.IGNORECASE)
+    if date_match:
+        try:
+            start = datetime.fromisoformat(date_match.group(1))
+            end = datetime.fromisoformat(date_match.group(2))
+        except ValueError:
+            return ""
+        nights = (end - start).days
+        return str(nights) if nights > 0 else ""
+    return ""
+
+
 def clamp(value: float, low: float = 0.0, high: float = 10.0) -> float:
     return max(low, min(high, value))
 
@@ -207,6 +262,66 @@ def repo_relative(path: Path | str | None) -> str:
         return path.resolve().relative_to(ROOT).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def path_exists(repo_path: str) -> bool:
+    if is_unknownish(repo_path):
+        return False
+    return (ROOT / repo_path).exists()
+
+
+def build_sheet_payload(link_id: str, source_url: str, candidate: dict[str, Any]) -> dict[str, Any]:
+    row = {col: str(candidate.get(col, "") or "") for col in CANDIDATE_COLUMNS if col != "sheet_payload_path"}
+    return {
+        "link_id": link_id,
+        "candidate_id": row.get("candidate_id", ""),
+        "source_url": source_url,
+        "google_sheet_target": GOOGLE_SHEET_TARGET,
+        "row": row,
+    }
+
+
+def save_sheet_payload(link_id: str, source_url: str, candidate: dict[str, Any]) -> Path:
+    ensure_directories()
+    payload_path = SHEET_PAYLOADS_DIR / f"{link_id}.json"
+    candidate["sheet_payload_path"] = repo_relative(payload_path)
+    payload = build_sheet_payload(link_id, source_url, candidate)
+    payload["row"]["sheet_payload_path"] = repo_relative(payload_path)
+    save_json(payload_path, payload)
+    return payload_path
+
+
+def build_run_entry(
+    link_id: str,
+    source_url: str,
+    crawl_status: str,
+    needs_manual_input: bool,
+    candidate_id: str,
+    extracted_json_path: str = "",
+    sheet_payload_path: str = "",
+    raw_markdown_path: str = "",
+    raw_html_path: str = "",
+    screenshot_path: str = "",
+) -> dict[str, Any]:
+    return {
+        "link_id": link_id,
+        "source_url": source_url,
+        "crawl_status": crawl_status,
+        "needs_manual_input": needs_manual_input,
+        "candidate_id": candidate_id,
+        "extracted_json_path": extracted_json_path,
+        "sheet_payload_path": sheet_payload_path,
+        "raw_markdown_path": raw_markdown_path,
+        "raw_html_path": raw_html_path,
+        "screenshot_path": screenshot_path,
+    }
+
+
+def write_latest_run(run: dict[str, Any]) -> Path:
+    ensure_directories()
+    latest_path = RUNS_DIR / "latest.json"
+    save_json(latest_path, run)
+    return latest_path
 
 
 def append_error(link_id: str, stage: str, message: str, payload: dict[str, Any] | None = None) -> Path:

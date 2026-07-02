@@ -1,0 +1,13 @@
+{
+  "crawl_status": "success",
+  "error": "",
+  "link_id": "link_smoke_sample",
+  "platform": "other",
+  "raw_html_path": "data/raw/link_smoke_sample.html",
+  "raw_json_path": "data/raw/link_smoke_sample.json",
+  "raw_markdown_path": "data/raw/link_smoke_sample.md",
+  "screenshot_path": "",
+  "source_url": "https://example.invalid/listings/quiet-cumbre-del-sol-apartment",
+  "status_code": 200,
+  "success": true
+}

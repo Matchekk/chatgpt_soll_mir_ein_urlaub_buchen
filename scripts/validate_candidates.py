@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 import sys
+from pathlib import Path
 
-from utils import CANDIDATE_COLUMNS, CANDIDATES_PATH, as_bool, parse_float, read_csv
+from utils import CANDIDATE_COLUMNS, CANDIDATES_PATH, ROOT, as_bool, is_unknownish, parse_float, read_csv
 
 NUMERIC_OR_UNKNOWN = ["price_total", "nights"]
 SCORE_COLUMNS = [
@@ -17,8 +19,10 @@ SCORE_COLUMNS = [
 ]
 
 
-def is_unknownish(value: str) -> bool:
-    return str(value).strip().lower() in {"", "unknown", "not_available", "none"}
+def repo_file_exists(value: str) -> bool:
+    if is_unknownish(value):
+        return False
+    return (ROOT / str(value)).exists()
 
 
 def main() -> int:
@@ -64,6 +68,34 @@ def main() -> int:
             expected = "true" if price_pp <= 500 else "false"
             if budget != expected:
                 errors.append(f"{label}: budget_under_500pp should be {expected}")
+        crawl_status = str(row.get("crawl_status", "")).strip().lower()
+        needs_manual = as_bool(row.get("needs_manual_input"))
+        if crawl_status in {"blocked", "failed"} and not needs_manual:
+            errors.append(f"{label}: crawl_status={crawl_status} requires needs_manual_input=true")
+        if crawl_status == "success":
+            extracted_path = row.get("extracted_json_path", "")
+            if not repo_file_exists(extracted_path):
+                errors.append(f"{label}: crawl_status=success requires existing extracted_json_path")
+            if needs_manual and not any(is_unknownish(row.get(col, "")) for col in ["price_total", "date_range", "nights"]):
+                errors.append(f"{label}: success + needs_manual_input=true needs missing price/date/nights justification")
+        raw_html_path = row.get("raw_html_path", "")
+        if not is_unknownish(raw_html_path) and not repo_file_exists(raw_html_path):
+            errors.append(f"{label}: raw_html_path does not exist: {raw_html_path}")
+        came_from_crawl = crawl_status in {"success", "blocked", "failed", "partial"}
+        if came_from_crawl:
+            payload_path = row.get("sheet_payload_path", "")
+            if not repo_file_exists(payload_path):
+                errors.append(f"{label}: crawled candidate requires existing sheet_payload_path")
+            else:
+                try:
+                    payload = json.loads((ROOT / str(payload_path)).read_text(encoding="utf-8"))
+                except json.JSONDecodeError:
+                    errors.append(f"{label}: sheet_payload_path is not valid JSON")
+                else:
+                    if is_unknownish(payload.get("link_id", "")):
+                        errors.append(f"{label}: sheet payload missing link_id")
+                    if payload.get("candidate_id") != row.get("candidate_id"):
+                        errors.append(f"{label}: sheet payload candidate_id does not match CSV")
 
     if errors:
         for error in errors:

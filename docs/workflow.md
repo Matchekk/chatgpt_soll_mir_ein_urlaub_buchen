@@ -1,71 +1,71 @@
 # Travel Research Workflow
 
-Dieses Repo verarbeitet Unterkunftslinks in eine Google-Sheets-kompatible Costa-Blanca-Matrix.
+Dieses Repo ist das Backend fuer den ChatGPT-zu-Google-Sheet-Workflow.
+
+## Rollen
+
+- GitHub: crawlt Links, speichert Raw Markdown/HTML/Metadata, extrahiert JSON, scored Kandidaten, baut Excel und Handoff-Payloads.
+- ChatGPT: liest `data/runs/latest.json`, prueft die finale Entscheidung und schreibt die Payload-Zeile per Google-Sheets/Drive-Connector in `Sommerurlaub Mati und Noa`.
+- Google Sheet: bleibt das Live-Frontend fuer Mati und Noa.
 
 ## Ablauf
 
-1. Mati oder Noa trägt einen Unterkunftslink in `data/link-intake.csv` ein.
-2. `python scripts/crawl_links.py` verarbeitet Zeilen mit `status=new`.
-3. Der Crawler speichert Rohdaten in `data/raw/`.
-4. `extract_listing.py` extrahiert konservativ strukturierte Felder.
-5. `score_candidate.py` berechnet Budget, Distanzen, Family-Risiko und Gesamtscore.
-6. `update_candidates_csv.py` ergänzt oder aktualisiert `data/costa-blanca-candidates.csv`.
-7. `build_excel.py` erzeugt `exports/costa-blanca-matrix.xlsx`.
-8. Google Sheets kann die CSVs per `IMPORTDATA()` anzeigen.
-
-## Kein Anti-Bot-Bypass
-
-Das System umgeht keine Captchas, keine Bot-Checks und keine Zugriffsbeschränkungen. Wenn eine Seite blockt, wird der Link als geprüft markiert:
+1. Mati oder Noa schickt ChatGPT einen Unterkunftslink.
+2. ChatGPT ergaenzt `data/link-intake.csv` oder startet lokal/remote `scripts/crawl_links.py --url`.
+3. GitHub Action oder lokaler Crawler verarbeitet neue Links mit `status=new`.
+4. Pro Link entstehen:
 
 ```text
-crawl_status = blocked
-needs_manual_input = true
+data/raw/<link_id>.md
+data/raw/<link_id>.html
+data/raw/<link_id>.json
+data/extracted/<link_id>.json
+data/sheet-payloads/<link_id>.json
 ```
 
-Bei technischen Fehlern wird `crawl_status=failed` gesetzt und ein Fehlerbericht in `data/errors/` gespeichert.
+5. Nach dem Lauf entsteht:
 
-## Lokal ausführen
+```text
+data/runs/latest.json
+```
+
+6. ChatGPT liest `latest.json`, oeffnet die dort referenzierte Sheet-Payload und schreibt die finale Zeile ins Google Sheet.
+
+## Lokal
 
 ```bash
 pip install -r requirements.txt
-python scripts/crawl_links.py
+python scripts/crawl_links.py --dry-run
+python scripts/smoke_test_pipeline.py
 python scripts/validate_candidates.py
 python scripts/build_excel.py
 ```
 
-Nützliche Varianten:
+Echte Links:
 
 ```bash
-python scripts/crawl_links.py --dry-run
+python scripts/crawl_links.py --url "https://www.airbnb.de/rooms/..." --submitted-by "Mati" --date-range "2026-09-04 to 2026-09-13" --notes "Airbnb von Noa"
 python scripts/crawl_links.py --all
-python scripts/crawl_links.py --url "https://www.airbnb.de/rooms/..."
+python scripts/crawl_links.py --only-new
 ```
 
-## GitHub Action
+## Statusregeln
 
-Die Action `.github/workflows/crawl-links.yml` läuft manuell über `workflow_dispatch` oder wenn `data/link-intake.csv` geändert wird. Sie crawlt, validiert, baut Excel und committet nur dann zurück, wenn generierte Dateien geändert wurden.
+- `success`: Crawler hat verwertbare Seite gelesen.
+- `partial`: Crawler war erfolgreich, aber Preis/Datum/Naechte fehlen und ChatGPT braucht manuelle Eingabe.
+- `blocked`: Seite blockiert, Captcha/Login/Bot-Check oder Zugriff verweigert.
+- `failed`: technischer Fehler.
 
-## Scoring-Kurzfassung
-
-Gewichte:
-
-- `private_level`: 18 %
-- `child_potential_inverse`: 18 %
-- `quiet_score_0_10`: 18 %
-- `beach_fit_0_10`: 14 %
-- `transfer_score_0_10`: 10 %
-- `budget_score_0_10`: 12 %
-- `review_evidence_0_10`: 10 %
-
-`child_potential_inverse = 10 - child_potential_0_10`. Wenn `excluded=true`, ist `overall_score_0_10 = 0`.
-
-## Distanzen
-
-ALC und VLC werden nur grob geschätzt:
+Bei `blocked` oder `failed` gilt immer:
 
 ```text
-Haversine-Distanz * 1.23 Straßenfaktor
-Fahrzeit = road_km / 75 * 60
+needs_manual_input = true
 ```
 
-Das ist keine Live-Google-Maps-Route.
+## Kein Anti-Bot-Bypass
+
+Das System umgeht keine Captchas, Login-Walls, Bot-Checks oder Zugriffskontrollen. Wenn blockiert wird, entstehen trotzdem ein Kandidat, Error-JSON und Manifest-Eintrag, damit ChatGPT und Mati/Noa sehen, dass der Link geprueft wurde.
+
+## Excel
+
+`exports/costa-blanca-matrix.xlsx` wird aus CSV/JSON-Artefakten gebaut. Nicht manuell als Datenquelle editieren, sondern CSV/Intake/Handoff-Dateien aktualisieren und `python scripts/build_excel.py` erneut ausfuehren.

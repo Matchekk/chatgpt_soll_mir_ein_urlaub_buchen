@@ -100,10 +100,13 @@ def _json_ld_payloads(raw: str) -> list[dict[str, Any]]:
             parsed = json.loads(script.get_text(strip=True))
         except json.JSONDecodeError:
             continue
-        if isinstance(parsed, list):
-            payloads.extend(item for item in parsed if isinstance(item, dict))
-        elif isinstance(parsed, dict):
-            payloads.append(parsed)
+        candidates = parsed if isinstance(parsed, list) else [parsed]
+        for item in candidates:
+            if isinstance(item, dict):
+                payloads.append(item)
+                graph = item.get("@graph")
+                if isinstance(graph, list):
+                    payloads.extend(child for child in graph if isinstance(child, dict))
     return payloads
 
 
@@ -172,10 +175,25 @@ def _extract_from_json_ld(payloads: list[dict[str, Any]], result: dict[str, Any]
                 result["rating"] = str(aggregate["ratingValue"])
             if result["review_count"] == UNKNOWN and aggregate.get("reviewCount") is not None:
                 result["review_count"] = str(aggregate["reviewCount"])
+        offers = payload.get("offers")
+        if isinstance(offers, dict) and result["price_total"] == UNKNOWN and offers.get("price") is not None:
+            result["price_total"] = str(offers["price"])
 
 
-def extract_listing(raw: str, url: str = "", platform: str | None = None) -> ListingExtraction:
-    text = _clean_text(raw)
+def extract_listing(
+    raw: str = "",
+    url: str = "",
+    platform: str | None = None,
+    raw_html: str = "",
+    raw_markdown: str = "",
+) -> ListingExtraction:
+    if raw and not raw_html and not raw_markdown:
+        if "<html" in raw.lower() or "<body" in raw.lower():
+            raw_html = raw
+        else:
+            raw_markdown = raw
+    combined_raw = "\n".join(part for part in [raw_html, raw_markdown] if part)
+    text = _clean_text(combined_raw)
     compact = re.sub(r"\s+", " ", text)
     lower = compact.lower()
     hard_terms = _contains_any(compact, HARD_FAMILY_TERMS)
@@ -185,7 +203,7 @@ def extract_listing(raw: str, url: str = "", platform: str | None = None) -> Lis
     result["platform"] = platform or detect_platform(url)
     result["url"] = url or UNKNOWN
 
-    _extract_from_json_ld(_json_ld_payloads(raw), result)
+    _extract_from_json_ld(_json_ld_payloads(raw_html or raw), result)
 
     if result["name"] == UNKNOWN:
         result["name"] = _markdown_title(text)
@@ -193,19 +211,20 @@ def extract_listing(raw: str, url: str = "", platform: str | None = None) -> Lis
         lines = [line.strip("# *\t ") for line in text.splitlines() if line.strip()]
         result["name"] = next((line for line in lines[:8] if 8 <= len(line) <= 140), UNKNOWN)
 
-    result["price_total"] = _first_match(
-        [
-            r"(?:total|gesamt|price|preis)[^\d€]{0,30}€?\s*([0-9][0-9., ]{1,12})",
-            r"€\s*([0-9][0-9., ]{1,12})\s*(?:total|gesamt)",
-            r"([0-9][0-9., ]{1,12})\s*€\s*(?:total|gesamt)",
-        ],
-        compact,
-    )
+    if result["price_total"] == UNKNOWN:
+        result["price_total"] = _first_match(
+            [
+                r"(?:total|gesamt|price|preis)[^\d€]{0,30}€?\s*([0-9][0-9., ]{1,12})",
+                r"€\s*([0-9][0-9., ]{1,12})\s*(?:total|gesamt)",
+                r"([0-9][0-9., ]{1,12})\s*€\s*(?:total|gesamt)",
+            ],
+            compact,
+        ).rstrip(".")
     result["rating"] = result["rating"] if result["rating"] != UNKNOWN else _first_match([r"([0-9][.,][0-9])\s*(?:/|von|out of)\s*10"], compact)
     result["review_count"] = result["review_count"] if result["review_count"] != UNKNOWN else _first_match([r"([0-9][0-9.]*)\s+(?:reviews|bewertungen|beurteilungen)"], compact)
     result["nights"] = _first_match([r"([0-9]{1,2})\s+(?:nights|nächte|naechte)"], compact)
-    result["lat"] = result["lat"] if result["lat"] != UNKNOWN else _first_match([r'"latitude"\s*:\s*"?(-?\d+\.\d+)"?', r"\blat(?:itude)?\b[=: ]+(-?\d+\.\d+)"], raw)
-    result["lng"] = result["lng"] if result["lng"] != UNKNOWN else _first_match([r'"longitude"\s*:\s*"?(-?\d+\.\d+)"?', r"\b(?:lng|lon|longitude)\b[=: ]+(-?\d+\.\d+)"], raw)
+    result["lat"] = result["lat"] if result["lat"] != UNKNOWN else _first_match([r'"latitude"\s*:\s*"?(-?\d+\.\d+)"?', r"\blat(?:itude)?\b[=: ]+(-?\d+\.\d+)"], combined_raw)
+    result["lng"] = result["lng"] if result["lng"] != UNKNOWN else _first_match([r'"longitude"\s*:\s*"?(-?\d+\.\d+)"?', r"\b(?:lng|lon|longitude)\b[=: ]+(-?\d+\.\d+)"], combined_raw)
 
     result["property_type"] = _infer_property_type(compact)
     result["kitchen"] = _yes_unknown(lower, ["kitchen", "küche", "cocina"])
@@ -226,14 +245,20 @@ def extract_listing(raw: str, url: str = "", platform: str | None = None) -> Lis
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Extract structured listing data from crawled markdown/html/text.")
-    parser.add_argument("--input", required=True, help="Path to raw markdown/html/text.")
+    parser.add_argument("--input", default="", help="Path to raw markdown/html/text. Kept for backwards compatibility.")
+    parser.add_argument("--html", default="", help="Path to raw HTML.")
+    parser.add_argument("--markdown", default="", help="Path to raw Markdown.")
     parser.add_argument("--url", default="", help="Source URL.")
     parser.add_argument("--platform", default="", help="Known platform.")
     parser.add_argument("--output", default="", help="Optional JSON output path.")
     args = parser.parse_args()
 
-    raw = Path(args.input).read_text(encoding="utf-8", errors="replace")
-    extracted = extract_listing(raw, args.url, args.platform or None)
+    if not args.input and not args.html and not args.markdown:
+        parser.error("one of --input, --html, or --markdown is required")
+    raw = Path(args.input).read_text(encoding="utf-8", errors="replace") if args.input else ""
+    raw_html = Path(args.html).read_text(encoding="utf-8", errors="replace") if args.html else ""
+    raw_markdown = Path(args.markdown).read_text(encoding="utf-8", errors="replace") if args.markdown else ""
+    extracted = extract_listing(raw, args.url, args.platform or None, raw_html=raw_html, raw_markdown=raw_markdown)
     payload = model_to_dict(extracted)
     if args.output:
         save_json(Path(args.output), payload)

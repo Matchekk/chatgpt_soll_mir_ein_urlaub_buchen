@@ -43,11 +43,22 @@ jobs:
       - name: Build Excel export
         run: python scripts/build_excel.py
 
+      - name: Upload handoff artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: travel-crawler-handoff
+          if-no-files-found: ignore
+          path: |
+            data/runs/latest.json
+            data/sheet-payloads/*.json
+            exports/costa-blanca-matrix.xlsx
+
       - name: Commit generated updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/costa-blanca-candidates.csv data/link-intake.csv data/raw data/extracted data/screenshots data/errors exports/costa-blanca-matrix.xlsx
+          git add data/costa-blanca-candidates.csv data/link-intake.csv data/runs data/sheet-payloads data/raw data/extracted data/screenshots data/errors exports/costa-blanca-matrix.xlsx
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
           else

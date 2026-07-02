@@ -166,6 +166,67 @@ def top_rows(df: pd.DataFrame, sort_col: str, n: int = 5, ascending: bool = Fals
     return work[["name", "location", "price_per_person", "overall_score_0_10", "child_potential_0_10", "quiet_score_0_10", "url"]]
 
 
+def add_handoff_graphic(ws, df: pd.DataFrame) -> None:
+    payload_count = int(df.get("sheet_payload_path", pd.Series(dtype=str)).astype(str).str.strip().ne("").sum()) if "sheet_payload_path" in df else 0
+    manual_count = int(df.get("needs_manual_input", pd.Series(dtype=str)).astype(str).str.lower().eq("true").sum()) if "needs_manual_input" in df else 0
+    success_count = int(df.get("crawl_status", pd.Series(dtype=str)).astype(str).str.lower().eq("success").sum()) if "crawl_status" in df else 0
+
+    ws.merge_cells("A48:D48")
+    ws["A48"] = "Crawler handoff"
+    ws["A48"].fill = TITLE_FILL
+    ws["A48"].font = Font(name="Aptos Display", size=14, bold=True, color="FFFFFF")
+    ws["A48"].alignment = Alignment(horizontal="center", vertical="center")
+
+    ws.merge_cells("A49:D49")
+    ws["A49"] = "Link intake > Crawl > Score > Google Sheet payload"
+    ws["A49"].fill = SUBTLE_FILL
+    ws["A49"].font = Font(bold=True, color="16324F")
+    ws["A49"].alignment = Alignment(horizontal="center", vertical="center")
+
+    steps = [
+        ("1", "LINK", "Intake"),
+        ("2", "CRAWL", "Raw HTML/MD"),
+        ("3", "SCORE", "Matrix"),
+        ("4", "SHEET", "Payload JSON"),
+    ]
+    fills = ["2F6F73", "4D9078", "F2B84B", "D86F45"]
+    for offset, (num, label, detail) in enumerate(steps, start=1):
+        top = ws.cell(51, offset)
+        mid = ws.cell(52, offset)
+        bot = ws.cell(53, offset)
+        for cell in [top, mid, bot]:
+            cell.fill = PatternFill("solid", fgColor=fills[offset - 1])
+            cell.border = Border(top=THIN, bottom=THIN, left=THIN, right=THIN)
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        top.value = num
+        top.font = Font(size=16, bold=True, color="FFFFFF")
+        mid.value = label
+        mid.font = Font(bold=True, color="FFFFFF")
+        bot.value = detail
+        bot.font = Font(size=9, color="FFFFFF")
+        ws.row_dimensions[51].height = 22
+        ws.row_dimensions[52].height = 22
+        ws.row_dimensions[53].height = 26
+
+    stat_rows = [
+        ("Success crawls", success_count),
+        ("Payloads ready", payload_count),
+        ("Manual input", manual_count),
+    ]
+    for row_offset, (label, value) in enumerate(stat_rows, start=55):
+        ws.merge_cells(start_row=row_offset, start_column=1, end_row=row_offset, end_column=3)
+        ws.cell(row_offset, 1, label)
+        ws.cell(row_offset, 1).fill = CARD_FILL
+        ws.cell(row_offset, 1).font = Font(bold=True, color="16324F")
+        ws.cell(row_offset, 1).alignment = Alignment(horizontal="left", vertical="center")
+        ws.cell(row_offset, 4, value)
+        ws.cell(row_offset, 4).fill = SUBTLE_FILL
+        ws.cell(row_offset, 4).font = Font(bold=True, color="16324F")
+        ws.cell(row_offset, 4).alignment = Alignment(horizontal="center", vertical="center")
+        for col in range(1, 5):
+            ws.cell(row_offset, col).border = Border(bottom=THIN)
+
+
 def dashboard(ws, df: pd.DataFrame) -> None:
     ws.sheet_view.showGridLines = False
     ws.merge_cells("A1:H1")
@@ -225,6 +286,8 @@ def dashboard(ws, df: pd.DataFrame) -> None:
         display = as_display_df(table_df.fillna(""))
         write_simple_block(ws, display, start + 1, 1)
 
+    add_handoff_graphic(ws, df)
+
     for col in range(1, 9):
         ws.column_dimensions[get_column_letter(col)].width = 20
 
@@ -271,7 +334,20 @@ def scoring_explanation(ws) -> None:
 
 
 def raw_status_frame(candidates: pd.DataFrame, intake: pd.DataFrame) -> pd.DataFrame:
-    columns = ["candidate_id", "name", "url", "crawl_status", "needs_manual_input", "raw_markdown_path", "raw_json_path", "screenshot_path", "last_updated"]
+    columns = [
+        "candidate_id",
+        "name",
+        "url",
+        "crawl_status",
+        "needs_manual_input",
+        "raw_markdown_path",
+        "raw_html_path",
+        "raw_json_path",
+        "extracted_json_path",
+        "sheet_payload_path",
+        "screenshot_path",
+        "last_updated",
+    ]
     left = candidates[[col for col in columns if col in candidates.columns]].copy()
     intake_small = intake[["link_id", "source_url", "status", "crawl_status", "needs_manual_input", "last_updated"]].copy()
     intake_small = intake_small.rename(columns={"source_url": "url"})

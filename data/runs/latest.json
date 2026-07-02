@@ -1,0 +1,23 @@
+{
+  "blocked_count": 0,
+  "failed_count": 0,
+  "finished_at": "2026-07-02T12:05:57Z",
+  "processed_count": 1,
+  "processed_links": [
+    {
+      "candidate_id": "cand_c83aed35f35c",
+      "crawl_status": "success",
+      "extracted_json_path": "data/extracted/link_smoke_sample.json",
+      "link_id": "link_smoke_sample",
+      "needs_manual_input": false,
+      "raw_html_path": "data/raw/link_smoke_sample.html",
+      "raw_markdown_path": "data/raw/link_smoke_sample.md",
+      "screenshot_path": "",
+      "sheet_payload_path": "data/sheet-payloads/link_smoke_sample.json",
+      "source_url": "https://example.invalid/listings/quiet-cumbre-del-sol-apartment"
+    }
+  ],
+  "run_id": "smoke-test",
+  "started_at": "2026-07-02T12:05:57Z",
+  "success_count": 1
+}
