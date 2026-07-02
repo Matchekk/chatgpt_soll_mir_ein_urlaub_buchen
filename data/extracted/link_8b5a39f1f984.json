@@ -1,0 +1,53 @@
+{
+  "air_conditioning": "true",
+  "date_range": "unknown",
+  "family_red_flags": "familienzimmer; resort; children; child; kids; baby; kinder; familie; treppenschutz; brettspiele; puzzle; puzzles",
+  "found_terms": [
+    "familienzimmer",
+    "resort",
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "hard_family_red_flags": [
+    "familienzimmer",
+    "resort"
+  ],
+  "kitchen": "true",
+  "lat": "38.6394",
+  "lng": "0.0398974",
+  "location": "Partida Manzanera, Edf Zeus, Bloque 10, Autonome Gemeinschaft Valencia, Spanien",
+  "name": "Apartamento Zeus - PlusHolidays",
+  "nights": "8",
+  "parking": "true",
+  "platform": "booking",
+  "pool_type": "private",
+  "price_total": "300",
+  "property_type": "villa",
+  "quiet_evidence": "ruhig; tranquil; tranquilo; entspannen",
+  "rating": "7.7",
+  "review_count": "18",
+  "review_evidence": "18 Bewertungen gefunden",
+  "soft_family_red_flags": [
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "terrace_or_balcony": "true",
+  "url": "https://www.booking.com/hotel/es/zeus.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "whole_place_evidence": "unknown"
+}

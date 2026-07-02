@@ -1,0 +1,17 @@
+{
+  "source_url": "https://www.booking.com/hotel/es/altea-cap-negret-by-kalmarent.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "link_id": "link_fc44e97bbeaf",
+  "platform": "booking",
+  "crawl_status": "partial",
+  "status_code": "browser_fallback",
+  "success": true,
+  "error": "Browser fallback loaded listing content, but no visible price was found.",
+  "raw_markdown_path": "data/raw/link_fc44e97bbeaf.md",
+  "raw_html_path": "data/raw/link_fc44e97bbeaf.html",
+  "screenshot_path": "data/screenshots/link_fc44e97bbeaf.png",
+  "browser_fallback": true,
+  "title": "Altea Cap Negret by KalmaRent, Altea (aktualisierte Preise für 2026)",
+  "url": "https://www.booking.com/hotel/es/altea-cap-negret-by-kalmarent.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "body_length": 19257,
+  "html_length": 200011
+}

@@ -1,0 +1,10 @@
+{
+  "last_updated": "2026-07-02",
+  "link_id": "link_3bf0f2fe6774",
+  "message": "No room links discovered or search page blocked.",
+  "payload": {
+    "crawl_status": "success",
+    "source_url": "https://www.airbnb.de/s/Cala-Baladrar--Spain/homes?checkin=2026-09-08&checkout=2026-09-16&adults=2&children=0&infants=0&pets=0"
+  },
+  "stage": "airbnb-discovery"
+}

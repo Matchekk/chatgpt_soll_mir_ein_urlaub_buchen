@@ -1,0 +1,16 @@
+{
+  "last_updated": "2026-07-02",
+  "link_id": "link_fc44e97bbeaf",
+  "message": "failed",
+  "payload": {
+    "crawl_status": "failed",
+    "error": "Blocked by anti-bot protection: Structural: no <body> tag (23258 bytes)",
+    "fetched_url": "https://www.booking.com/hotel/es/altea-cap-negret-by-kalmarent.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+    "html_length": 23258,
+    "markdown_length": 1,
+    "screenshot_present": true,
+    "status_code": 202,
+    "success": false
+  },
+  "stage": "failed"
+}

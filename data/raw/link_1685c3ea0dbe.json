@@ -1,0 +1,18 @@
+{
+  "crawl_status": "success",
+  "crawl_url": "https://www.booking.com/hotel/es/casa-marron-boutique-home.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/casa-marron-boutique-home.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1612032,
+  "link_id": "link_1685c3ea0dbe",
+  "markdown_length": 52386,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_1685c3ea0dbe.html",
+  "raw_json_path": "data/raw/link_1685c3ea0dbe.json",
+  "raw_markdown_path": "data/raw/link_1685c3ea0dbe.md",
+  "screenshot_path": "data/screenshots/link_1685c3ea0dbe.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/casa-marron-boutique-home.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

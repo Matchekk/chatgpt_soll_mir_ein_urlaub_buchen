@@ -1,0 +1,53 @@
+{
+  "air_conditioning": "true",
+  "date_range": "unknown",
+  "family_red_flags": "familienzimmer; resort; children; child; kids; baby; kinder; familie; treppenschutz; brettspiele; puzzle; puzzles",
+  "found_terms": [
+    "familienzimmer",
+    "resort",
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "hard_family_red_flags": [
+    "familienzimmer",
+    "resort"
+  ],
+  "kitchen": "true",
+  "lat": "38.8395886",
+  "lng": "0.1056322",
+  "location": "11 Carrer Sant Josep, Autonome Gemeinschaft Valencia, Spanien",
+  "name": "Apartamento centro de Denia con parking gratuito By El Conserje",
+  "nights": "8",
+  "parking": "true",
+  "platform": "booking",
+  "pool_type": "private",
+  "price_total": "200",
+  "property_type": "villa",
+  "quiet_evidence": "ruhig; tranquil; entspannen; relax",
+  "rating": "9.1",
+  "review_count": "23",
+  "review_evidence": "23 Bewertungen gefunden",
+  "soft_family_red_flags": [
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "terrace_or_balcony": "true",
+  "url": "https://www.booking.com/hotel/es/apartamento-sant-josep-by-el-conserje.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "whole_place_evidence": "unknown"
+}

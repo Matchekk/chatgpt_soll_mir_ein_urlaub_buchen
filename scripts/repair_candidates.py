@@ -10,7 +10,9 @@ from utils import (
     LINK_INTAKE_COLUMNS,
     LINK_INTAKE_PATH,
     UNKNOWN,
+    extract_price_hint,
     infer_nights,
+    is_plausible_price,
     is_unknownish,
     parse_float,
     read_csv,
@@ -52,6 +54,10 @@ def _append_note(existing: str, note: str) -> str:
     return f"{existing} {note}".strip()
 
 
+def _remove_price_hint_note(existing: str) -> str:
+    return re.sub(r"\s*Preis aus Intake-Hinweis [^.]*\.", " ", str(existing or "")).strip()
+
+
 def _price_looks_implausible(value: Any) -> bool:
     text = str(value or "").strip()
     if is_unknownish(text):
@@ -71,6 +77,17 @@ def _price_looks_implausible(value: Any) -> bool:
     return False
 
 
+def _price_matches_identifier(candidate: dict[str, Any]) -> bool:
+    number = parse_float(candidate.get("price_total"))
+    if number is None:
+        return False
+    price_token = str(int(number)) if number.is_integer() else str(number).split(".")[0]
+    if len(price_token) < 3:
+        return False
+    haystack = " ".join(str(candidate.get(key, "") or "") for key in ["url", "notes", "raw_json_path", "raw_html_path"])
+    return any(identifier.startswith(price_token) for identifier in re.findall(r"\b\d{5,}\b", haystack))
+
+
 def main() -> int:
     candidates = read_csv(CANDIDATES_PATH, CANDIDATE_COLUMNS)
     intake = read_csv(LINK_INTAKE_PATH, LINK_INTAKE_COLUMNS)
@@ -84,19 +101,25 @@ def main() -> int:
         intake_row = intake_by_url.get(url)
 
         repaired = False
-        if platform == "airbnb" and _price_looks_implausible(candidate.get("price_total")):
-            fallback_total = _fallback_total_from_intake(intake_row) if intake_row else None
+        if not is_plausible_price(candidate.get("price_total")) or _price_matches_identifier(candidate):
+            fallback_hint = extract_price_hint(
+                candidate.get("notes", ""),
+                intake_row.get("notes", "") if intake_row else "",
+                intake_row.get("date_range_hint", "") if intake_row else "",
+            )
+            fallback_total = parse_float(fallback_hint) if fallback_hint else (_fallback_total_from_intake(intake_row) if intake_row else None)
             if fallback_total is not None and 100 <= fallback_total <= 5000:
                 candidate["price_total"] = str(int(fallback_total)) if fallback_total.is_integer() else f"{fallback_total:.2f}"
                 candidate["notes"] = _append_note(candidate.get("notes", ""), "Preis aus Intake-Hinweis übernommen; vor Buchung live prüfen.")
             else:
                 candidate["price_total"] = UNKNOWN
                 candidate["needs_manual_input"] = "true"
+                candidate["notes"] = _remove_price_hint_note(candidate.get("notes", ""))
                 candidate["notes"] = _append_note(candidate.get("notes", ""), "Crawler-Preis war unplausibel; Preis muss manuell geprüft werden.")
             repaired = True
 
         name = str(candidate.get("name", "")).lower()
-        if platform == "airbnb" and "apartment" in name and str(candidate.get("property_type", "")).lower() == "villa":
+        if "apartment" in name and str(candidate.get("property_type", "")).lower() == "villa":
             candidate["property_type"] = "apartment"
             repaired = True
 
@@ -105,6 +128,12 @@ def main() -> int:
             if nights:
                 candidate["nights"] = nights
                 repaired = True
+
+        critical_missing = ["price_total", "nights", "location", "lat", "lng", "name"]
+        if any(is_unknownish(candidate.get(key)) for key in critical_missing):
+            if candidate.get("needs_manual_input") != "true":
+                repaired = True
+            candidate["needs_manual_input"] = "true"
 
         if repaired:
             scored = score_candidate(candidate)

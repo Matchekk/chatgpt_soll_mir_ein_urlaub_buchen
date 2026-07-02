@@ -1,0 +1,18 @@
+{
+  "crawl_status": "success",
+  "crawl_url": "https://www.booking.com/hotel/es/bonito-atico-con-terraza-altea.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/bonito-atico-con-terraza-altea.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1536207,
+  "link_id": "link_077008835c4b",
+  "markdown_length": 50573,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_077008835c4b.html",
+  "raw_json_path": "data/raw/link_077008835c4b.json",
+  "raw_markdown_path": "data/raw/link_077008835c4b.md",
+  "screenshot_path": "data/screenshots/link_077008835c4b.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/bonito-atico-con-terraza-altea.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

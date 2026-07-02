@@ -23,8 +23,11 @@ RUNS_DIR = DATA_DIR / "runs"
 EXPORTS_DIR = ROOT / "exports"
 
 LINK_INTAKE_PATH = DATA_DIR / "link-intake.csv"
+CODEX_SEEDS_PATH = DATA_DIR / "link-intake-codex-seeds-2026-09-08-to-2026-09-16.csv"
 CANDIDATES_PATH = DATA_DIR / "costa-blanca-candidates.csv"
 EXCEL_PATH = EXPORTS_DIR / "costa-blanca-matrix.xlsx"
+REPORTS_DIR = ROOT / "reports"
+SEED_REPORT_PATH = REPORTS_DIR / "codex-seed-crawl-report.md"
 
 GOOGLE_SHEET_TARGET = {
     "spreadsheet_id": "1WLQPMeByU0EMO7W8D9v6SuOeIBXVyXWXw07LexT-e_s",
@@ -183,6 +186,7 @@ def ensure_directories() -> None:
         SHEET_PAYLOADS_DIR,
         RUNS_DIR,
         EXPORTS_DIR,
+        REPORTS_DIR,
     ]:
         path.mkdir(parents=True, exist_ok=True)
 
@@ -272,6 +276,40 @@ def parse_float(value: Any) -> float | None:
     return float(match.group(0).replace(",", "."))
 
 
+def is_plausible_price(value: Any, min_total: float = 100.0, max_total: float = 5000.0) -> bool:
+    text = str(value or "").strip()
+    if not text or re.search(r"\d{4}-\d{2}-\d{2}", text):
+        return False
+    if len(re.findall(r"\d+", text)) > 3:
+        return False
+    number = parse_float(text)
+    return number is not None and min_total <= number <= max_total
+
+
+def extract_price_hint(*parts: Any) -> str:
+    text = " ".join(str(part or "") for part in parts)
+    text = re.sub(r"\b\d{5,}\b", " ", text)
+    text = re.sub(r"\b20\d{2}[-/.]\d{1,2}[-/.]\d{1,2}\b", " ", text)
+    patterns = [
+        r"(?:gesamt|total|preis|price|unterkunft|ca\.?|circa)[^\d€]{0,40}€?\s*([1-9]\d{2,3}(?:[.,]\d{1,2})?)",
+        r"€\s*([1-9]\d{2,3}(?:[.,]\d{1,2})?)",
+        r"([1-9]\d{2,3}(?:[.,]\d{1,2})?)\s*(?:€|eur|euro)",
+        r"([1-9]\d{2,3}(?:[.,]\d{1,2})?)\s*(?:gesamt|total)",
+    ]
+    for pattern in patterns:
+        for match in re.finditer(pattern, text, flags=re.IGNORECASE):
+            candidate = match.group(1).replace(",", ".")
+            if is_plausible_price(candidate):
+                return fmt_number(parse_float(candidate), 2)
+    pp_match = re.search(r"([1-9]\d{2,3}(?:[.,]\d{1,2})?)\s*(?:€|eur|euro)?\s*(?:p\.?\s*p\.?|pro person|per person)", text, flags=re.IGNORECASE)
+    if pp_match:
+        pp = parse_float(pp_match.group(1).replace(",", "."))
+        total = pp * 2 if pp is not None else None
+        if is_plausible_price(total):
+            return fmt_number(total, 2)
+    return ""
+
+
 def parse_int(value: Any) -> int | None:
     number = parse_float(value)
     return int(round(number)) if number is not None else None
@@ -283,6 +321,44 @@ def is_unknownish(value: Any) -> bool:
 
 def known_value(value: Any) -> str:
     return "" if is_unknownish(value) else str(value).strip()
+
+
+TECH_TO_DE = {
+    "unknown": "unbekannt",
+    "candidate": "Kandidat",
+    "risk": "Risiko",
+    "excluded": "Ausgeschlossen",
+    "blocked": "Blockiert",
+    "failed": "Fehlgeschlagen",
+    "success": "Erfolgreich",
+    "partial": "Teilweise",
+    "manual": "Manuell",
+    "true": "Ja",
+    "false": "Nein",
+    "apartment": "Apartment / Wohnung",
+    "holiday home": "Ferienhaus",
+    "bungalow": "Bungalow",
+    "villa": "Villa",
+    "hotel": "Hotel",
+    "aparthotel": "Aparthotel",
+    "shared": "geteilt",
+    "private": "privat",
+    "none": "keine",
+}
+
+
+def display_value_de(key: str, value: Any) -> str:
+    text = str(value or "").strip()
+    lower = text.lower()
+    if key == "needs_manual_input" and lower == "true":
+        return "Manuelle Prüfung"
+    if lower in TECH_TO_DE:
+        return TECH_TO_DE[lower]
+    return text
+
+
+def display_row_de(row: dict[str, Any]) -> dict[str, str]:
+    return {key: display_value_de(key, value) for key, value in row.items()}
 
 
 def infer_nights(text: Any) -> str:

@@ -1,0 +1,18 @@
+{
+  "crawl_status": "success",
+  "crawl_url": "https://www.booking.com/hotel/es/apartamentos-retiro-park-ii.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/apartamentos-retiro-park-ii.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1773175,
+  "link_id": "link_b2af4bf3603b",
+  "markdown_length": 52231,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_b2af4bf3603b.html",
+  "raw_json_path": "data/raw/link_b2af4bf3603b.json",
+  "raw_markdown_path": "data/raw/link_b2af4bf3603b.md",
+  "screenshot_path": "data/screenshots/link_b2af4bf3603b.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/apartamentos-retiro-park-ii.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

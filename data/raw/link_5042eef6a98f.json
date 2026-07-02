@@ -1,0 +1,18 @@
+{
+  "crawl_status": "success",
+  "crawl_url": "https://www.booking.com/hotel/es/aparthotel-costera-la-mar.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/aparthotel-costera-la-mar.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1958897,
+  "link_id": "link_5042eef6a98f",
+  "markdown_length": 61285,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_5042eef6a98f.html",
+  "raw_json_path": "data/raw/link_5042eef6a98f.json",
+  "raw_markdown_path": "data/raw/link_5042eef6a98f.md",
+  "screenshot_path": "data/screenshots/link_5042eef6a98f.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/aparthotel-costera-la-mar.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

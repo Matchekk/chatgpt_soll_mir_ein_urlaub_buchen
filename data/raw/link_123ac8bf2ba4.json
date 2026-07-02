@@ -1,0 +1,18 @@
+{
+  "crawl_status": "partial",
+  "crawl_url": "https://www.booking.com/hotel/es/holiday-home-residencial-casanova-by-interhome.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/holiday-home-residencial-casanova-by-interhome.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1513587,
+  "link_id": "link_123ac8bf2ba4",
+  "markdown_length": 47223,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_123ac8bf2ba4.html",
+  "raw_json_path": "data/raw/link_123ac8bf2ba4.json",
+  "raw_markdown_path": "data/raw/link_123ac8bf2ba4.md",
+  "screenshot_path": "data/screenshots/link_123ac8bf2ba4.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/holiday-home-residencial-casanova-by-interhome.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

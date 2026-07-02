@@ -1,0 +1,53 @@
+{
+  "air_conditioning": "true",
+  "date_range": "unknown",
+  "family_red_flags": "familienzimmer; resort; children; child; kids; baby; kinder; familie; treppenschutz; brettspiele; puzzle; puzzles",
+  "found_terms": [
+    "familienzimmer",
+    "resort",
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "hard_family_red_flags": [
+    "familienzimmer",
+    "resort"
+  ],
+  "kitchen": "true",
+  "lat": "38.505478600000004",
+  "lng": "-0.2332438",
+  "location": "CL Frai Posidonio Major 5, Es:1 Pl:00 Pt:01 CP: 03570, Autonome Gemeinschaft Valencia, Spanien",
+  "name": "POSIDONIO old town apartment",
+  "nights": "8",
+  "parking": "unknown",
+  "platform": "booking",
+  "pool_type": "private",
+  "price_total": "300",
+  "property_type": "villa",
+  "quiet_evidence": "ruhig; entspannen; relax",
+  "rating": "8.7",
+  "review_count": "37",
+  "review_evidence": "37 Bewertungen gefunden",
+  "soft_family_red_flags": [
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "terrace_or_balcony": "true",
+  "url": "https://www.booking.com/hotel/es/posidonio-old-town-apartment.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "whole_place_evidence": "unknown"
+}

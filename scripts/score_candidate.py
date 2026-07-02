@@ -17,6 +17,7 @@ GOOD_BEACH_AREAS = [
     "cala llebeig",
     "cala baladrar",
     "cala advocat",
+    "la solsida",
     "cala llobella",
     "cala pinets",
     "cala del portitxol",
@@ -31,6 +32,11 @@ GOOD_BEACH_AREAS = [
     "benitachell",
     "moraira",
     "benissa costa",
+    "cala baladrar",
+    "cala advocat",
+    "altea cap negret",
+    "cap negret",
+    "el portet",
     "altea-mascarat",
     "mascarat",
 ]
@@ -41,12 +47,15 @@ BAD_BEACH_AREAS = [
     "rincon de loix",
     "rincón de loix",
     "calpe la fossa",
+    "la fossa",
     "calpe city centre",
     "jávea arenal",
     "javea arenal",
     "cala finestrat beachfront",
     "promenade",
     "promenade beach",
+    "resort",
+    "aparthotel",
 ]
 
 HARD_EXCLUDE_TERMS = [
@@ -59,10 +68,17 @@ HARD_EXCLUDE_TERMS = [
     "playground",
     "spielzimmer",
     "game room",
+    "indoorspielbereich",
+    "outdoorspielgeräte",
+    "outdoorspielgeraete",
     "aparthotel",
     "resort",
     "aqua park",
     "wasserpark",
+    "kids club",
+    "kinderclub",
+    "entertainment team",
+    "animation",
 ]
 
 

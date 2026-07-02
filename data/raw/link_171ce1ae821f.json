@@ -1,0 +1,18 @@
+{
+  "crawl_status": "success",
+  "crawl_url": "https://www.booking.com/hotel/es/apartment-esmeralda.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/apartment-esmeralda.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1551963,
+  "link_id": "link_171ce1ae821f",
+  "markdown_length": 51947,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_171ce1ae821f.html",
+  "raw_json_path": "data/raw/link_171ce1ae821f.json",
+  "raw_markdown_path": "data/raw/link_171ce1ae821f.md",
+  "screenshot_path": "data/screenshots/link_171ce1ae821f.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/apartment-esmeralda.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

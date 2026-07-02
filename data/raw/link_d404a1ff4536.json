@@ -1,0 +1,18 @@
+{
+  "crawl_status": "success",
+  "crawl_url": "https://www.booking.com/hotel/es/apartemento-monika-monte-pedrera-c-4.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/apartemento-monika-monte-pedrera-c-4.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1705097,
+  "link_id": "link_d404a1ff4536",
+  "markdown_length": 46967,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_d404a1ff4536.html",
+  "raw_json_path": "data/raw/link_d404a1ff4536.json",
+  "raw_markdown_path": "data/raw/link_d404a1ff4536.md",
+  "screenshot_path": "data/screenshots/link_d404a1ff4536.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/apartemento-monika-monte-pedrera-c-4.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

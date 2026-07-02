@@ -1,0 +1,18 @@
+{
+  "crawl_status": "success",
+  "crawl_url": "https://www.booking.com/hotel/es/apartamentos-flamingo-hills-entre-javea-y-moraira.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/apartamentos-flamingo-hills-entre-javea-y-moraira.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1943191,
+  "link_id": "link_fd0828172dc8",
+  "markdown_length": 53791,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_fd0828172dc8.html",
+  "raw_json_path": "data/raw/link_fd0828172dc8.json",
+  "raw_markdown_path": "data/raw/link_fd0828172dc8.md",
+  "screenshot_path": "data/screenshots/link_fd0828172dc8.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/apartamentos-flamingo-hills-entre-javea-y-moraira.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

@@ -1,0 +1,53 @@
+{
+  "air_conditioning": "true",
+  "date_range": "unknown",
+  "family_red_flags": "familienzimmer; resort; children; child; kids; baby; kinder; familie; treppenschutz; brettspiele; puzzle; puzzles",
+  "found_terms": [
+    "familienzimmer",
+    "resort",
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "hard_family_red_flags": [
+    "familienzimmer",
+    "resort"
+  ],
+  "kitchen": "true",
+  "lat": "38.839903227051",
+  "lng": "0.10749177182",
+  "location": "16 Carrer de Diana, Autonome Gemeinschaft Valencia, Spanien",
+  "name": "Diana 16",
+  "nights": "8",
+  "parking": "unknown",
+  "platform": "booking",
+  "pool_type": "private",
+  "price_total": "250",
+  "property_type": "villa",
+  "quiet_evidence": "ruhig; tranquil; entspannen",
+  "rating": "8.0",
+  "review_count": "18",
+  "review_evidence": "18 Bewertungen gefunden",
+  "soft_family_red_flags": [
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "terrace_or_balcony": "true",
+  "url": "https://www.booking.com/hotel/es/diana-16.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "whole_place_evidence": "unknown"
+}

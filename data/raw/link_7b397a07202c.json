@@ -1,0 +1,18 @@
+{
+  "crawl_status": "partial",
+  "crawl_url": "https://www.booking.com/hotel/es/holiday-home-mirador-benitachell.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/holiday-home-mirador-benitachell.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1515401,
+  "link_id": "link_7b397a07202c",
+  "markdown_length": 44584,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_7b397a07202c.html",
+  "raw_json_path": "data/raw/link_7b397a07202c.json",
+  "raw_markdown_path": "data/raw/link_7b397a07202c.md",
+  "screenshot_path": "data/screenshots/link_7b397a07202c.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/holiday-home-mirador-benitachell.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

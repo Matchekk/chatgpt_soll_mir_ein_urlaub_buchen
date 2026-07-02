@@ -36,6 +36,13 @@ jobs:
           pip install -r requirements.txt
           python -m playwright install --with-deps chromium
 
+      - name: Import high-priority seed links
+        run: python scripts/import_codex_seeds.py --priority high
+
+      - name: Discover Airbnb room links from search seeds
+        run: python scripts/discover_airbnb_rooms.py
+        continue-on-error: true
+
       - name: Crawl links
         run: python scripts/crawl_links.py
         continue-on-error: true
@@ -49,6 +56,9 @@ jobs:
       - name: Build Excel export
         run: python scripts/build_excel.py
 
+      - name: Build seed crawl report
+        run: python scripts/build_seed_report.py
+
       - name: Upload handoff artifacts
         uses: actions/upload-artifact@v4
         if: always()
@@ -58,13 +68,14 @@ jobs:
           path: |
             data/runs/latest.json
             data/sheet-payloads/*.json
+            reports/codex-seed-crawl-report.md
             exports/costa-blanca-matrix.xlsx
 
       - name: Commit generated updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/costa-blanca-candidates.csv data/link-intake.csv data/runs data/sheet-payloads data/raw data/extracted data/screenshots data/errors exports/costa-blanca-matrix.xlsx
+          git add data/costa-blanca-candidates.csv data/link-intake.csv data/runs data/sheet-payloads data/raw data/extracted data/screenshots data/errors reports exports/costa-blanca-matrix.xlsx
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
           else

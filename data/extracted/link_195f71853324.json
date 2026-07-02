@@ -1,0 +1,53 @@
+{
+  "air_conditioning": "true",
+  "date_range": "unknown",
+  "family_red_flags": "familienzimmer; resort; children; child; kids; baby; kinder; familie; treppenschutz; brettspiele; puzzle; puzzles",
+  "found_terms": [
+    "familienzimmer",
+    "resort",
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "hard_family_red_flags": [
+    "familienzimmer",
+    "resort"
+  ],
+  "kitchen": "true",
+  "lat": "38.60265",
+  "lng": "-0.0462605",
+  "location": "Carrer Metge Adolfo Quiles, 3, 16, Autonome Gemeinschaft Valencia, Spanien",
+  "name": "TAJ house center Altea #C",
+  "nights": "8",
+  "parking": "unknown",
+  "platform": "booking",
+  "pool_type": "private",
+  "price_total": "2026",
+  "property_type": "villa",
+  "quiet_evidence": "ruhig; entspannen",
+  "rating": "7.7",
+  "review_count": "3",
+  "review_evidence": "3 Bewertungen gefunden",
+  "soft_family_red_flags": [
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "terrace_or_balcony": "true",
+  "url": "https://www.booking.com/hotel/es/taj-house-center-c.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "whole_place_evidence": "unknown"
+}

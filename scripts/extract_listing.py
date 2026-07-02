@@ -10,7 +10,7 @@ from typing import Any, Iterable
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 
-from utils import UNKNOWN, detect_platform, is_unknownish, save_json
+from utils import UNKNOWN, detect_platform, is_plausible_price, is_unknownish, save_json
 
 HARD_FAMILY_TERMS = [
     "familienzimmer",
@@ -402,8 +402,10 @@ def _extract_from_json_ld(payloads: list[dict[str, Any]], result: dict[str, Any]
             _set_if_unknown(result, "rating", aggregate.get("ratingValue"))
             _set_if_unknown(result, "review_count", aggregate.get("reviewCount"))
         offers = payload.get("offers")
-        if isinstance(offers, dict):
-            _set_if_unknown(result, "price_total", offers.get("price"))
+        if isinstance(offers, dict) and result["price_total"] == UNKNOWN and offers.get("price") is not None:
+            price = str(offers["price"])
+            if is_plausible_price(price):
+                result["price_total"] = price
 
 
 def _extract_from_nested_json(payloads: list[Any], result: dict[str, Any]) -> None:
@@ -454,7 +456,7 @@ def _extract_from_nested_json(payloads: list[Any], result: dict[str, Any]) -> No
                 if not key_has_price_signal:
                     continue
                 candidate = _numeric_string(value)
-                if candidate != UNKNOWN:
+                if candidate != UNKNOWN and is_plausible_price(candidate):
                     result["price_total"] = candidate
                     break
 
@@ -538,9 +540,13 @@ def extract_listing(
         result["name"] = next((line for line in lines[:15] if _looks_like_listing_title(line)), UNKNOWN)
 
     _extract_regex_fields(analysis_text, combined_raw, result)
+    if not is_plausible_price(result["price_total"]):
+        result["price_total"] = UNKNOWN
 
     if result["property_type"] == UNKNOWN:
         result["property_type"] = _infer_property_type(analysis_text)
+    if "apartment" in result["name"].lower() and result["property_type"] == "villa" and "villa" not in lower:
+        result["property_type"] = "apartment"
 
     result["kitchen"] = _yes_unknown(lower, AMENITY_TERMS["kitchen"])
     result["air_conditioning"] = _yes_unknown(lower, AMENITY_TERMS["air_conditioning"])

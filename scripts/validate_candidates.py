@@ -76,8 +76,8 @@ def main() -> int:
             extracted_path = row.get("extracted_json_path", "")
             if not repo_file_exists(extracted_path):
                 errors.append(f"{label}: crawl_status=success requires existing extracted_json_path")
-            if needs_manual and not any(is_unknownish(row.get(col, "")) for col in ["price_total", "date_range", "nights"]):
-                errors.append(f"{label}: success + needs_manual_input=true needs missing price/date/nights justification")
+            if needs_manual and not any(is_unknownish(row.get(col, "")) for col in ["price_total", "date_range", "nights", "location", "lat", "lng", "name"]):
+                errors.append(f"{label}: success + needs_manual_input=true needs missing price/date/nights/location/coordinate justification")
         raw_html_path = row.get("raw_html_path", "")
         if not is_unknownish(raw_html_path) and not repo_file_exists(raw_html_path):
             errors.append(f"{label}: raw_html_path does not exist: {raw_html_path}")

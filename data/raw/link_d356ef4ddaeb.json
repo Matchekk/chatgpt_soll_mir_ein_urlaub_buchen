@@ -1,0 +1,18 @@
+{
+  "crawl_status": "partial",
+  "crawl_url": "https://www.booking.com/hotel/es/alojamientos-la-vila-mayor-36-la-vila-joiosa.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/alojamientos-la-vila-mayor-36-la-vila-joiosa.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1714875,
+  "link_id": "link_d356ef4ddaeb",
+  "markdown_length": 55132,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_d356ef4ddaeb.html",
+  "raw_json_path": "data/raw/link_d356ef4ddaeb.json",
+  "raw_markdown_path": "data/raw/link_d356ef4ddaeb.md",
+  "screenshot_path": "data/screenshots/link_d356ef4ddaeb.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/alojamientos-la-vila-mayor-36-la-vila-joiosa.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

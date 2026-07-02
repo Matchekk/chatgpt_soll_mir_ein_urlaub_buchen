@@ -28,8 +28,10 @@ from utils import (
     build_run_entry,
     detect_platform,
     ensure_directories,
+    extract_price_hint,
     fmt_number,
     infer_nights,
+    is_plausible_price,
     is_unknownish,
     known_value,
     now_iso,
@@ -62,12 +64,14 @@ def normalize_intake(df):
             df[col] = ""
     for idx, row in df.iterrows():
         url = str(row.get("source_url", "")).strip()
+        if not url:
+            df.at[idx, "status"] = "ignored"
+            continue
         if not str(row.get("status", "")).strip():
-            df.at[idx, "status"] = "new" if url else "ignored"
-        if url:
-            if not str(row.get("link_id", "")).strip():
-                df.at[idx, "link_id"] = stable_id(url, "link_")
-            df.at[idx, "platform"] = str(row.get("platform", "")).strip() or detect_platform(url)
+            df.at[idx, "status"] = "new"
+        if not str(row.get("link_id", "")).strip():
+            df.at[idx, "link_id"] = stable_id(url, "link_")
+        df.at[idx, "platform"] = str(row.get("platform", "")).strip() or detect_platform(url)
         if not str(row.get("reviewed", "")).strip():
             df.at[idx, "reviewed"] = "false"
         if not str(row.get("needs_manual_input", "")).strip():
@@ -383,6 +387,20 @@ def process_extracted(
         candidate["date_range"] = row.get("date_range_hint") or UNKNOWN
     if is_unknownish(candidate.get("nights")):
         candidate["nights"] = infer_nights(candidate.get("date_range")) or infer_nights(row.get("date_range_hint")) or UNKNOWN
+    notes = str(candidate.get("notes", "") or "")
+    if not is_plausible_price(candidate.get("price_total")):
+        hint_price = extract_price_hint(row.get("notes"), row.get("date_range_hint"), row.get("priority"))
+        if hint_price:
+            candidate["price_total"] = hint_price
+            notes = f"{notes} Preis aus Intake-Hinweis übernommen; vor Buchung live prüfen.".strip()
+        else:
+            candidate["price_total"] = UNKNOWN
+            notes = f"{notes} Crawler-Preis war unplausibel; Preis muss manuell geprüft werden.".strip()
+    if str(candidate.get("name", "")).lower().find("apartment") >= 0 and str(candidate.get("property_type", "")).lower() == "villa":
+        text = " ".join(str(candidate.get(k, "")) for k in ["name", "notes", "whole_place_evidence"]).lower()
+        if "villa" not in text:
+            candidate["property_type"] = "apartment"
+    candidate["notes"] = notes
     candidate["candidate_id"] = stable_id(url, "cand_")
     candidate["url"] = url
     candidate["source"] = row.get("platform") or candidate.get("platform") or detect_platform(url)

@@ -1,0 +1,18 @@
+{
+  "crawl_status": "partial",
+  "crawl_url": "https://www.booking.com/hotel/es/apartamento-sant-josep-by-el-conserje.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "error": "",
+  "fetched_url": "https://www.booking.com/hotel/es/apartamento-sant-josep-by-el-conserje.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "html_length": 1529482,
+  "link_id": "link_b125a24db97f",
+  "markdown_length": 50576,
+  "platform": "booking",
+  "raw_html_path": "data/raw/link_b125a24db97f.html",
+  "raw_json_path": "data/raw/link_b125a24db97f.json",
+  "raw_markdown_path": "data/raw/link_b125a24db97f.md",
+  "screenshot_path": "data/screenshots/link_b125a24db97f.png",
+  "screenshot_present": true,
+  "source_url": "https://www.booking.com/hotel/es/apartamento-sant-josep-by-el-conserje.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "status_code": 202,
+  "success": true
+}

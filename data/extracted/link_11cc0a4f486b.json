@@ -1,0 +1,53 @@
+{
+  "air_conditioning": "true",
+  "date_range": "unknown",
+  "family_red_flags": "familienzimmer; resort; children; child; kids; baby; kinder; familie; treppenschutz; brettspiele; puzzle; puzzles",
+  "found_terms": [
+    "familienzimmer",
+    "resort",
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "hard_family_red_flags": [
+    "familienzimmer",
+    "resort"
+  ],
+  "kitchen": "true",
+  "lat": "38.679955731129",
+  "lng": "0.11420913191182",
+  "location": "MORAIRA/CALPE 244, Autonome Gemeinschaft Valencia, Spanien",
+  "name": "Villas Guzman - Meu Lar",
+  "nights": "8",
+  "parking": "true",
+  "platform": "booking",
+  "pool_type": "private",
+  "price_total": "2026",
+  "property_type": "villa",
+  "quiet_evidence": "ruhig; entspannen",
+  "rating": "8.2",
+  "review_count": "15",
+  "review_evidence": "15 Bewertungen gefunden",
+  "soft_family_red_flags": [
+    "children",
+    "child",
+    "kids",
+    "baby",
+    "kinder",
+    "familie",
+    "treppenschutz",
+    "brettspiele",
+    "puzzle",
+    "puzzles"
+  ],
+  "terrace_or_balcony": "true",
+  "url": "https://www.booking.com/hotel/es/meu-lar-moraira.html?aid=2438770&checkin=2026-09-08&checkout=2026-09-16&no_rooms=1&group_adults=2&selected_currency=EUR",
+  "whole_place_evidence": "unknown"
+}
