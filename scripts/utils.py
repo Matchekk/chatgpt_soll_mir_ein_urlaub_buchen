@@ -35,6 +35,7 @@ GOOGLE_SHEET_TARGET = {
 UNKNOWN = "unknown"
 TRUTHY = {"true", "1", "yes", "ja", "y"}
 FALSY = {"false", "0", "no", "nein", "n"}
+UNKNOWNISH = {"", "unknown", "unbekannt", "not_available", "nicht verfügbar", "nicht verfuegbar", "none", "nan"}
 
 LINK_INTAKE_COLUMNS = [
     "link_id",
@@ -105,6 +106,71 @@ CANDIDATE_COLUMNS = [
     "notes",
     "last_updated",
 ]
+
+SHEET_DISPLAY_COLUMNS_DE = [
+    "Bild",
+    "Status",
+    "Unterkunft",
+    "Link",
+    "Zeitraum",
+    "Nächte",
+    "Ort",
+    "Gesamt €",
+    "€ p.P.",
+    "€ p.P./Nacht",
+    "Budget",
+    "Score",
+    "Kinder",
+    "Ruhe",
+    "Strand",
+    "Privat",
+    "Reviews",
+    "ALC km",
+    "ALC min",
+    "VLC km",
+    "VLC min",
+    "Pool",
+    "Typ",
+    "No-Go",
+    "Notizen",
+]
+
+STATUS_DE = {
+    "candidate": "Kandidat",
+    "shortlist": "Shortlist",
+    "backup": "Backup",
+    "risk": "Risiko",
+    "excluded": "Ausgeschlossen",
+    "blocked": "Blockiert",
+    "failed": "Fehlgeschlagen",
+    "partial": "Teilweise",
+    "done": "Erledigt",
+    "new": "Neu",
+    "processing": "In Verarbeitung",
+}
+
+PROPERTY_TYPE_DE = {
+    "apartment": "Apartment / Wohnung",
+    "holiday home": "Ferienhaus",
+    "holiday house": "Ferienhaus",
+    "bungalow": "Bungalow",
+    "villa": "Villa",
+    "hotel": "Hotel",
+    "aparthotel": "Aparthotel",
+    "room": "Zimmer",
+}
+
+POOL_TYPE_DE = {
+    "private": "privat",
+    "shared": "geteilt",
+    "none": "kein Pool",
+}
+
+EXCLUSION_REASON_DE = {
+    "family_no_go": "Kinder-/Familien-No-Go",
+    "excluded": "Ausgeschlossen",
+    "none": "Nein",
+}
 
 
 def ensure_directories() -> None:
@@ -197,9 +263,9 @@ def parse_float(value: Any) -> float | None:
     if value is None:
         return None
     text = str(value).strip()
-    if not text or text.lower() in {"unknown", "not_available", "none", "nan"}:
+    if text.lower() in UNKNOWNISH:
         return None
-    text = text.replace("\xa0", " ")
+    text = text.replace("\xa0", " ").replace("€", " ").replace("EUR", " ").replace("eur", " ")
     match = re.search(r"-?\d+(?:[.,]\d+)?", text.replace(" ", ""))
     if not match:
         return None
@@ -212,7 +278,7 @@ def parse_int(value: Any) -> int | None:
 
 
 def is_unknownish(value: Any) -> bool:
-    return str(value or "").strip().lower() in {"", "unknown", "not_available", "none", "nan"}
+    return str(value or "").strip().lower() in UNKNOWNISH
 
 
 def known_value(value: Any) -> str:
@@ -270,14 +336,132 @@ def path_exists(repo_path: str) -> bool:
     return (ROOT / repo_path).exists()
 
 
+def _de_unknown(value: Any) -> str:
+    return "unbekannt" if is_unknownish(value) else str(value).strip()
+
+
+def _de_bool(value: Any) -> str:
+    if is_unknownish(value):
+        return "unbekannt"
+    return "Ja" if as_bool(value) else "Nein"
+
+
+def _de_lookup(value: Any, mapping: dict[str, str]) -> str:
+    if is_unknownish(value):
+        return "unbekannt"
+    text = str(value).strip()
+    return mapping.get(text.lower(), text)
+
+
+def _format_de_number(value: Any, digits: int = 1, suffix: str = "") -> str:
+    number = parse_float(value)
+    if number is None:
+        return "unbekannt"
+    formatted = f"{number:,.{digits}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    if digits > 0:
+        formatted = formatted.rstrip("0").rstrip(",")
+    return f"{formatted}{suffix}"
+
+
+def _format_de_money(value: Any) -> str:
+    number = parse_float(value)
+    if number is None:
+        return "unbekannt"
+    return f"€ {_format_de_number(number, 2)}"
+
+
+def _format_de_date_range(value: Any) -> str:
+    text = _de_unknown(value)
+    if text == "unbekannt":
+        return text
+    match = re.search(r"(\d{4})-(\d{2})-(\d{2})\s*(?:to|-|bis)\s*(\d{4})-(\d{2})-(\d{2})", text, flags=re.IGNORECASE)
+    if match:
+        y1, m1, d1, y2, m2, d2 = match.groups()
+        if y1 == y2:
+            return f"{d1}.{m1}.–{d2}.{m2}.{y1}"
+        return f"{d1}.{m1}.{y1}–{d2}.{m2}.{y2}"
+    text = re.sub(r"\bnights\b", "Nächte", text, flags=re.IGNORECASE)
+    text = re.sub(r"\bnight\b", "Nacht", text, flags=re.IGNORECASE)
+    text = text.replace("user-provided", "User-Hinweis")
+    return text
+
+
+def _image_hint(candidate: dict[str, Any]) -> str:
+    if as_bool(candidate.get("excluded")):
+        return "⛔ No-Go"
+    status = str(candidate.get("status", "")).strip().lower()
+    location = str(candidate.get("location", "")).strip().lower()
+    if status == "risk":
+        return "⚠️ Risiko"
+    if any(term in location for term in ["tarbena", "tàrbena", "beniarbeig", "inland"]):
+        return "🏔️ Inland"
+    price_pp = parse_float(candidate.get("price_per_person"))
+    if price_pp is not None and price_pp <= 350:
+        return "💸 Budget"
+    if str(candidate.get("platform", "")).lower() == "airbnb":
+        return "📷 Airbnb"
+    return "🌊 Foto folgt"
+
+
+def candidate_to_german_sheet_row(candidate: dict[str, Any]) -> dict[str, str]:
+    reviews = "unbekannt"
+    rating = _de_unknown(candidate.get("rating"))
+    review_count = _de_unknown(candidate.get("review_count"))
+    if rating != "unbekannt" and review_count != "unbekannt":
+        reviews = f"{rating} · {review_count}"
+    elif rating != "unbekannt":
+        reviews = rating
+    elif review_count != "unbekannt":
+        reviews = f"{review_count} Bewertungen"
+
+    no_go = "Ja" if as_bool(candidate.get("excluded")) else "Nein"
+    notes = _de_unknown(candidate.get("notes"))
+    if notes == "unbekannt":
+        notes = ""
+    exclusion = _de_lookup(candidate.get("exclusion_reason"), EXCLUSION_REASON_DE)
+    if no_go == "Ja" and exclusion not in {"unbekannt", "Nein"} and exclusion not in notes:
+        notes = f"{notes} Ausschlussgrund: {exclusion}.".strip()
+
+    return {
+        "Bild": _image_hint(candidate),
+        "Status": _de_lookup(candidate.get("status"), STATUS_DE),
+        "Unterkunft": _de_unknown(candidate.get("name")),
+        "Link": _de_unknown(candidate.get("url")),
+        "Zeitraum": _format_de_date_range(candidate.get("date_range")),
+        "Nächte": _de_unknown(candidate.get("nights")),
+        "Ort": _de_unknown(candidate.get("location")),
+        "Gesamt €": _format_de_money(candidate.get("price_total")),
+        "€ p.P.": _format_de_money(candidate.get("price_per_person")),
+        "€ p.P./Nacht": _format_de_money(candidate.get("price_per_person_per_night")),
+        "Budget": _de_bool(candidate.get("budget_under_500pp")),
+        "Score": _format_de_number(candidate.get("overall_score_0_10"), 1),
+        "Kinder": _format_de_number(candidate.get("child_potential_0_10"), 1),
+        "Ruhe": _format_de_number(candidate.get("quiet_score_0_10"), 1),
+        "Strand": _format_de_number(candidate.get("beach_fit_0_10"), 1),
+        "Privat": _format_de_number(candidate.get("private_level"), 1),
+        "Reviews": reviews,
+        "ALC km": _format_de_number(candidate.get("alc_km_est"), 0),
+        "ALC min": _format_de_number(candidate.get("alc_drive_min_est"), 0),
+        "VLC km": _format_de_number(candidate.get("vlc_km_est"), 0),
+        "VLC min": _format_de_number(candidate.get("vlc_drive_min_est"), 0),
+        "Pool": _de_lookup(candidate.get("pool_type"), POOL_TYPE_DE),
+        "Typ": _de_lookup(candidate.get("property_type"), PROPERTY_TYPE_DE),
+        "No-Go": no_go,
+        "Notizen": notes,
+    }
+
+
 def build_sheet_payload(link_id: str, source_url: str, candidate: dict[str, Any]) -> dict[str, Any]:
     row = {col: str(candidate.get(col, "") or "") for col in CANDIDATE_COLUMNS if col != "sheet_payload_path"}
+    display_row_de = candidate_to_german_sheet_row(candidate)
     return {
         "link_id": link_id,
         "candidate_id": row.get("candidate_id", ""),
         "source_url": source_url,
         "google_sheet_target": GOOGLE_SHEET_TARGET,
         "row": row,
+        "display_headers_de": SHEET_DISPLAY_COLUMNS_DE,
+        "display_row_de": display_row_de,
     }
 
 
