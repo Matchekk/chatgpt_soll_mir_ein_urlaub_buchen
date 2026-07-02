@@ -40,6 +40,9 @@ jobs:
         run: python scripts/crawl_links.py
         continue-on-error: true
 
+      - name: Repair candidate data
+        run: python scripts/repair_candidates.py
+
       - name: Validate candidates
         run: python scripts/validate_candidates.py
 
