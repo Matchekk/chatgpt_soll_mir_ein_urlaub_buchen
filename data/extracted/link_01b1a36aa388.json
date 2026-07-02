@@ -1,14 +1,17 @@
 {
   "air_conditioning": "true",
   "date_range": "unknown",
-  "family_red_flags": "kinder; familie; familienfreundlich; family-friendly",
+  "family_red_flags": "animation; kinder; familie; familienfreundlich; family-friendly",
   "found_terms": [
+    "animation",
     "kinder",
     "familie",
     "familienfreundlich",
     "family-friendly"
   ],
-  "hard_family_red_flags": [],
+  "hard_family_red_flags": [
+    "animation"
+  ],
   "kitchen": "true",
   "lat": "38.5169",
   "lng": "-0.1991",
@@ -18,7 +21,7 @@
   "parking": "true",
   "platform": "airbnb",
   "pool_type": "shared",
-  "price_total": "5",
+  "price_total": "2026 1 2 3 4",
   "property_type": "villa",
   "quiet_evidence": "ruhig; entspannen",
   "rating": "5",
