@@ -1,0 +1,7 @@
+{
+  "last_updated": "2026-07-02",
+  "link_id": "link_01b1a36aa388",
+  "message": "BrowserType.launch: Executable doesn't exist at /home/runner/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     playwright install                                     ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝",
+  "payload": {},
+  "stage": "failed"
+}

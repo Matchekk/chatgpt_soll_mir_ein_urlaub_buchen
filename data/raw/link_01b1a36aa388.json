@@ -1,14 +1,10 @@
 {
-  "crawl_status": "success",
-  "error": "",
+  "crawl_status": "failed",
   "link_id": "link_01b1a36aa388",
   "platform": "airbnb",
   "raw_html_path": "data/raw/link_01b1a36aa388.html",
   "raw_json_path": "data/raw/link_01b1a36aa388.json",
   "raw_markdown_path": "data/raw/link_01b1a36aa388.md",
   "screenshot_path": "",
-  "source_url": "https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76",
-  "status_code": 200,
-  "success": true,
-  "url": "https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76"
+  "source_url": "https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76"
 }
