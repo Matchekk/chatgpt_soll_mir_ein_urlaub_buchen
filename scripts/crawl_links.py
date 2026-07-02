@@ -4,10 +4,12 @@ import argparse
 import asyncio
 import base64
 import os
+import re
 import sys
 import traceback
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from extract_listing import extract_listing, model_to_dict
 from score_candidate import score_candidate
@@ -24,11 +26,13 @@ from utils import (
     build_run_entry,
     detect_platform,
     ensure_directories,
+    fmt_number,
     infer_nights,
     is_unknownish,
     known_value,
     now_iso,
     now_timestamp,
+    parse_float,
     read_csv,
     repo_relative,
     save_json,
@@ -38,17 +42,6 @@ from utils import (
     write_csv,
 )
 
-BLOCKED_MARKERS = [
-    "captcha",
-    "verify you are human",
-    "access denied",
-    "request blocked",
-    "temporarily blocked",
-    "unusual traffic",
-    "enable cookies",
-    "robot check",
-]
-
 LISTING_MARKERS = [
     "/rooms/",
     "# apartment",
@@ -57,6 +50,7 @@ LISTING_MARKERS = [
     "# bungalow",
     "alle fotos anzeigen",
     "show all photos",
+    "apartment mit blick",
 ]
 
 
@@ -81,27 +75,111 @@ def normalize_intake(df):
     return df
 
 
-async def crawl_with_crawl4ai(url: str) -> dict[str, Any]:
+def _date_range_from_hint(text: Any) -> tuple[str, str] | None:
+    match = re.search(r"(\d{4}-\d{2}-\d{2})\s*(?:to|-|bis)\s*(\d{4}-\d{2}-\d{2})", str(text or ""), flags=re.IGNORECASE)
+    if not match:
+        return None
+    return match.group(1), match.group(2)
+
+
+def _add_query_params(url: str, params: dict[str, str]) -> str:
+    parsed = urlparse(url)
+    query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    for key, value in params.items():
+        if value and not query.get(key):
+            query[key] = value
+    return urlunparse(parsed._replace(query=urlencode(query)))
+
+
+def build_crawl_url(url: str, row: dict[str, Any]) -> str:
+    platform = str(row.get("platform", "")).strip() or detect_platform(url)
+    parsed_range = _date_range_from_hint(row.get("date_range_hint", ""))
+    if platform == "airbnb" and parsed_range:
+        check_in, check_out = parsed_range
+        return _add_query_params(url, {"check_in": check_in, "check_out": check_out, "adults": "2", "guests": "2"})
+    return url
+
+
+def _make_run_config(CrawlerRunConfig: Any, platform: str) -> Any | None:
+    if CrawlerRunConfig is None:
+        return None
+    kwargs: dict[str, Any] = {
+        "screenshot": True,
+        "word_count_threshold": 10,
+        "page_timeout": 90_000,
+        "delay_before_return_html": 4.0,
+        "wait_for": "js:() => document.body && document.body.innerText && document.body.innerText.length > 900",
+    }
+    if platform == "airbnb":
+        kwargs["wait_for"] = "js:() => document.body && /Airbnb|Bewertungen|Alle Fotos|Apartment|Unterkunft/i.test(document.body.innerText || '')"
+    optional_order = [
+        "word_count_threshold",
+        "delay_before_return_html",
+        "page_timeout",
+        "wait_for",
+        "screenshot",
+    ]
+    current = dict(kwargs)
+    while True:
+        try:
+            return CrawlerRunConfig(**current)
+        except TypeError:
+            if not optional_order:
+                return None
+            current.pop(optional_order.pop(0), None)
+
+
+def _markdown_to_text(markdown_value: Any) -> str:
+    if isinstance(markdown_value, str):
+        return markdown_value
+    for attr in ["raw_markdown", "markdown", "fit_markdown"]:
+        value = getattr(markdown_value, attr, None)
+        if isinstance(value, str) and value.strip():
+            return value
+    return str(markdown_value or "")
+
+
+async def crawl_with_crawl4ai(url: str, platform: str = "") -> dict[str, Any]:
     try:
         from crawl4ai import AsyncWebCrawler
     except Exception as exc:
         return {"crawl_status": "failed", "error": f"crawl4ai import failed: {exc}", "markdown": "", "html": "", "metadata": {}}
 
+    BrowserConfig = CrawlerRunConfig = None
     try:
-        async with AsyncWebCrawler() as crawler:
-            result = await crawler.arun(url=url)
+        from crawl4ai import BrowserConfig as _BrowserConfig
+        from crawl4ai import CrawlerRunConfig as _CrawlerRunConfig
+
+        BrowserConfig = _BrowserConfig
+        CrawlerRunConfig = _CrawlerRunConfig
+    except Exception:
+        pass
+
+    try:
+        browser_cfg = BrowserConfig(browser_type="chromium", headless=True, verbose=False) if BrowserConfig else None
+        run_cfg = _make_run_config(CrawlerRunConfig, platform)
+        crawler_kwargs = {"config": browser_cfg} if browser_cfg else {}
+        async with AsyncWebCrawler(**crawler_kwargs) as crawler:
+            if run_cfg is not None:
+                result = await crawler.arun(url=url, config=run_cfg)
+            else:
+                result = await crawler.arun(url=url)
     except Exception as exc:
         return {"crawl_status": "failed", "error": str(exc), "traceback": traceback.format_exc(), "markdown": "", "html": "", "metadata": {}}
 
-    markdown = getattr(result, "markdown", "") or getattr(result, "cleaned_html", "") or getattr(result, "html", "") or ""
-    html = getattr(result, "html", "") or ""
+    markdown = _markdown_to_text(getattr(result, "markdown", ""))
+    html = getattr(result, "html", "") or getattr(result, "cleaned_html", "") or ""
+    cleaned_html = getattr(result, "cleaned_html", "") or ""
+    if not markdown and cleaned_html:
+        markdown = cleaned_html
     status_code = getattr(result, "status_code", None) or getattr(result, "status", None)
     success = bool(getattr(result, "success", bool(markdown or html)))
     error = getattr(result, "error_message", "") or getattr(result, "error", "")
     combined = f"{markdown}\n{html}\n{error}".lower()
     has_listing_content = any(marker in combined for marker in LISTING_MARKERS)
-    blocked = status_code in {401, 403, 429} or (any(marker in combined for marker in BLOCKED_MARKERS) and not has_listing_content)
-    crawl_status = "blocked" if blocked else ("success" if success and (markdown or html) else "failed")
+    crawl_status = "success" if success and (markdown or html) and has_listing_content else ("partial" if success and (markdown or html) else "failed")
+    if status_code in {401, 403, 429}:
+        crawl_status = "blocked"
 
     screenshot_path = ""
     screenshot = getattr(result, "screenshot", None)
@@ -109,11 +187,14 @@ async def crawl_with_crawl4ai(url: str) -> dict[str, Any]:
         screenshot_path = "__pending__"
 
     metadata = {
-        "source_url": url,
+        "fetched_url": getattr(result, "url", "") or url,
         "status_code": status_code,
         "success": success,
         "error": str(error or ""),
         "crawl_status": crawl_status,
+        "html_length": len(html),
+        "markdown_length": len(markdown),
+        "screenshot_present": bool(screenshot),
     }
     return {
         "crawl_status": crawl_status,
@@ -156,7 +237,7 @@ def candidate_from_link(
     date_hint = row.get("date_range_hint") or UNKNOWN
     return {
         "candidate_id": stable_id(url, "cand_"),
-        "status": crawl_status if crawl_status in {"blocked", "failed"} else "candidate",
+        "status": crawl_status if crawl_status in {"blocked", "failed", "partial"} else "candidate",
         "source": row.get("platform") or detect_platform(url),
         "platform": row.get("platform") or detect_platform(url),
         "name": UNKNOWN,
@@ -178,6 +259,62 @@ def candidate_from_link(
     }
 
 
+def _price_from_intake(row: dict[str, Any]) -> float | None:
+    text = f"{row.get('date_range_hint', '')} {row.get('notes', '')}".replace("\xa0", " ")
+    pp_patterns = [
+        r"([0-9][0-9., ]{0,10})\s*(?:€|eur)\s*(?:p\.?\s*p\.?|pp|pro\s+person|per\s+person)",
+        r"(?:p\.?\s*p\.?|pp|pro\s+person|per\s+person)[^0-9]{0,20}([0-9][0-9., ]{0,10})\s*(?:€|eur)",
+    ]
+    total_patterns = [
+        r"(?:gesamt|total|insgesamt)[^0-9]{0,30}([0-9][0-9., ]{0,10})\s*(?:€|eur)",
+        r"([0-9][0-9., ]{0,10})\s*(?:€|eur)\s*(?:gesamt|total|insgesamt)",
+    ]
+    for pattern in pp_patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            value = parse_float(match.group(1))
+            if value is not None:
+                return value * 2
+    for pattern in total_patterns:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        if match:
+            value = parse_float(match.group(1))
+            if value is not None:
+                return value
+    return None
+
+
+def _manual_location_from_intake(row: dict[str, Any]) -> str:
+    text = f"{row.get('date_range_hint', '')}\n{row.get('notes', '')}"
+    match = re.search(r"(?:ort|location|lage)\s*[:=]\s*([^\n;]{2,120})", text, flags=re.IGNORECASE)
+    return match.group(1).strip() if match else ""
+
+
+def apply_intake_fallbacks(candidate: dict[str, Any], row: dict[str, Any]) -> None:
+    fallback_notes: list[str] = []
+    date_hint = str(row.get("date_range_hint", "")).strip()
+    if is_unknownish(candidate.get("date_range")) and date_hint:
+        candidate["date_range"] = date_hint
+    if is_unknownish(candidate.get("nights")):
+        nights = infer_nights(candidate.get("date_range")) or infer_nights(date_hint)
+        if nights:
+            candidate["nights"] = nights
+    if is_unknownish(candidate.get("price_total")):
+        fallback_price = _price_from_intake(row)
+        if fallback_price is not None:
+            candidate["price_total"] = fmt_number(fallback_price, 2)
+            fallback_notes.append("Preis aus Intake-Hinweis übernommen; bitte vor Buchung live prüfen.")
+    if is_unknownish(candidate.get("location")):
+        manual_location = _manual_location_from_intake(row)
+        if manual_location:
+            candidate["location"] = manual_location
+            fallback_notes.append("Ort aus Intake-Hinweis übernommen; bitte Kartenlage live prüfen.")
+    if fallback_notes:
+        existing_notes = known_value(candidate.get("notes"))
+        joined = " ".join(fallback_notes)
+        candidate["notes"] = f"{existing_notes} {joined}".strip()
+
+
 def process_extracted(
     row: dict[str, Any],
     extracted: dict[str, Any],
@@ -193,6 +330,7 @@ def process_extracted(
     for key, value in extracted.items():
         if key in CANDIDATE_COLUMNS and not is_unknownish(value):
             candidate[key] = value
+    apply_intake_fallbacks(candidate, row)
     if is_unknownish(candidate.get("date_range")):
         candidate["date_range"] = row.get("date_range_hint") or UNKNOWN
     if is_unknownish(candidate.get("nights")):
@@ -202,7 +340,7 @@ def process_extracted(
     candidate["source"] = row.get("platform") or candidate.get("platform") or detect_platform(url)
     candidate["platform"] = row.get("platform") or candidate.get("platform") or detect_platform(url)
     candidate["crawl_status"] = crawl_status
-    critical_unknown = any(is_unknownish(candidate.get(key)) for key in ["price_total", "date_range", "nights"])
+    critical_unknown = any(is_unknownish(candidate.get(key)) for key in ["price_total", "date_range", "nights", "location", "lat", "lng"])
     candidate["needs_manual_input"] = "true" if critical_unknown else "false"
     candidate["raw_markdown_path"] = repo_relative(raw_md)
     candidate["raw_html_path"] = repo_relative(raw_html)
@@ -211,7 +349,8 @@ def process_extracted(
     candidate["screenshot_path"] = screenshot_path
     candidate["last_updated"] = now_iso()
     scored = score_candidate(candidate)
-    scored["status"] = "excluded" if scored.get("excluded") == "true" else ("risk" if float(scored.get("child_potential_0_10", 0) or 0) >= 7 else "candidate")
+    child_score = parse_float(scored.get("child_potential_0_10")) or 0
+    scored["status"] = "excluded" if scored.get("excluded") == "true" else ("risk" if child_score >= 7 else "candidate")
     return scored
 
 
@@ -258,7 +397,8 @@ async def process_row(df, idx: int, dry_run: bool = False) -> dict[str, Any] | N
     raw_json = RAW_DIR / f"{link_id}.json"
     extracted_json = EXTRACTED_DIR / f"{link_id}.json"
 
-    crawl = await crawl_with_crawl4ai(url)
+    crawl_url = build_crawl_url(url, row)
+    crawl = await crawl_with_crawl4ai(crawl_url, platform)
     crawl_status = crawl.get("crawl_status", "failed")
     markdown = crawl.get("markdown", "") or ""
     html = crawl.get("html", "") or ""
@@ -269,6 +409,7 @@ async def process_row(df, idx: int, dry_run: bool = False) -> dict[str, Any] | N
     metadata = {
         **crawl.get("metadata", {}),
         "source_url": url,
+        "crawl_url": crawl_url,
         "link_id": link_id,
         "platform": platform,
         "crawl_status": crawl_status,
@@ -282,6 +423,7 @@ async def process_row(df, idx: int, dry_run: bool = False) -> dict[str, Any] | N
     if crawl_status in {"blocked", "failed"}:
         append_error(link_id, crawl_status, crawl.get("error", crawl_status), crawl.get("metadata", {}))
         candidate = candidate_from_link(row, crawl_status, True, raw_md, raw_html, raw_json, None, screenshot_path)
+        apply_intake_fallbacks(candidate, row)
         run_entry = finalize_candidate(link_id, row, candidate)
         df.at[idx, "status"] = crawl_status
         df.at[idx, "crawl_status"] = crawl_status
@@ -302,6 +444,7 @@ async def process_row(df, idx: int, dry_run: bool = False) -> dict[str, Any] | N
     except Exception as exc:
         append_error(link_id, "extract-score-update", str(exc), {"traceback": traceback.format_exc()})
         candidate = candidate_from_link(row, "failed", True, raw_md, raw_html, raw_json, extracted_json, screenshot_path)
+        apply_intake_fallbacks(candidate, row)
         run_entry = finalize_candidate(link_id, row, candidate)
         df.at[idx, "status"] = "failed"
         df.at[idx, "crawl_status"] = "failed"
