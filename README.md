@@ -1,0 +1,2 @@
+# chatgpt_soll_mir_ein_urlaub_buchen
+yes
