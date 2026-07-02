@@ -1,0 +1,49 @@
+{
+  "air_conditioning": "true",
+  "date_range": "unknown",
+  "family_red_flags": "resort; animation; children; child; baby; kinder; familie; familienfreundlich; brettspiele; family-friendly",
+  "found_terms": [
+    "resort",
+    "animation",
+    "children",
+    "child",
+    "baby",
+    "kinder",
+    "familie",
+    "familienfreundlich",
+    "brettspiele",
+    "family-friendly"
+  ],
+  "hard_family_red_flags": [
+    "resort",
+    "animation"
+  ],
+  "kitchen": "true",
+  "lat": "37.81165",
+  "lng": "-1.00774",
+  "location": "Torre-Pacheco",
+  "name": "Luxus-Spa und Golf-Villa Denton",
+  "nights": "8",
+  "parking": "true",
+  "platform": "airbnb",
+  "pool_type": "shared",
+  "price_total": "2",
+  "property_type": "villa",
+  "quiet_evidence": "entspannen",
+  "rating": "4.77",
+  "review_count": "127",
+  "review_evidence": "127 Bewertungen gefunden",
+  "soft_family_red_flags": [
+    "children",
+    "child",
+    "baby",
+    "kinder",
+    "familie",
+    "familienfreundlich",
+    "brettspiele",
+    "family-friendly"
+  ],
+  "terrace_or_balcony": "true",
+  "url": "https://www.airbnb.de/rooms/23320876?check_in=2026-09-08&check_out=2026-09-16&adults=2&guests=2&children=0&infants=0&pets=0",
+  "whole_place_evidence": "true"
+}

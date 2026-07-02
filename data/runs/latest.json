@@ -1,23 +1,23 @@
 {
   "blocked_count": 0,
   "failed_count": 0,
-  "finished_at": "2026-07-02T12:41:16Z",
+  "finished_at": "2026-07-02T12:50:01Z",
   "processed_count": 1,
   "processed_links": [
     {
-      "candidate_id": "cand_01b1a36aa388",
+      "candidate_id": "cand_ddb53dd48221",
       "crawl_status": "success",
-      "extracted_json_path": "data/extracted/link_01b1a36aa388.json",
-      "link_id": "link_01b1a36aa388",
+      "extracted_json_path": "data/extracted/link_ddb53dd48221.json",
+      "link_id": "link_ddb53dd48221",
       "needs_manual_input": false,
-      "raw_html_path": "data/raw/link_01b1a36aa388.html",
-      "raw_markdown_path": "data/raw/link_01b1a36aa388.md",
-      "screenshot_path": "data/screenshots/link_01b1a36aa388.png",
-      "sheet_payload_path": "data/sheet-payloads/link_01b1a36aa388.json",
-      "source_url": "https://www.airbnb.de/rooms/1202192166783165853?unique_share_id=ddf4638d-cc1a-4792-abed-520d6373d0d5&viralityEntryPoint=1&s=76"
+      "raw_html_path": "data/raw/link_ddb53dd48221.html",
+      "raw_markdown_path": "data/raw/link_ddb53dd48221.md",
+      "screenshot_path": "data/screenshots/link_ddb53dd48221.png",
+      "sheet_payload_path": "data/sheet-payloads/link_ddb53dd48221.json",
+      "source_url": "https://www.airbnb.de/rooms/23320876?check_in=2026-09-08&check_out=2026-09-16&adults=2&guests=2&children=0&infants=0&pets=0"
     }
   ],
-  "run_id": "28590682875",
-  "started_at": "2026-07-02T12:41:07Z",
+  "run_id": "28591226681",
+  "started_at": "2026-07-02T12:49:53Z",
   "success_count": 1
 }

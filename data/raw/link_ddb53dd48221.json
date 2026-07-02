@@ -1,0 +1,18 @@
+{
+  "crawl_status": "success",
+  "crawl_url": "https://www.airbnb.de/rooms/23320876?check_in=2026-09-08&check_out=2026-09-16&adults=2&guests=2&children=0&infants=0&pets=0",
+  "error": "",
+  "fetched_url": "https://www.airbnb.de/rooms/23320876?check_in=2026-09-08&check_out=2026-09-16&adults=2&guests=2&children=0&infants=0&pets=0",
+  "html_length": 1023975,
+  "link_id": "link_ddb53dd48221",
+  "markdown_length": 24125,
+  "platform": "airbnb",
+  "raw_html_path": "data/raw/link_ddb53dd48221.html",
+  "raw_json_path": "data/raw/link_ddb53dd48221.json",
+  "raw_markdown_path": "data/raw/link_ddb53dd48221.md",
+  "screenshot_path": "data/screenshots/link_ddb53dd48221.png",
+  "screenshot_present": true,
+  "source_url": "https://www.airbnb.de/rooms/23320876?check_in=2026-09-08&check_out=2026-09-16&adults=2&guests=2&children=0&infants=0&pets=0",
+  "status_code": 200,
+  "success": true
+}
